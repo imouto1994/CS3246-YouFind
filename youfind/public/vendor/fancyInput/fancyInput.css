@@ -1,0 +1,64 @@
+@keyframes caret{ 
+	50%{ opacity:0.1; transform:scaleY(.8); } 
+}
+@-webkit-keyframes caret{
+	50%{ opacity:0.1; -webkit-transform:scaleY(.8); } 
+}
+
+.fancyInput :-moz-placeholder{ color:rgba(255,255,255,0.2); } /* deprecated. but works for now. should use double '::'*/
+.fancyInput :-webkit-placeholder{ color:rgba(255,255,255,0.2); }
+
+.fancyInput{ 
+	display:inline-block; 
+	letter-spacing: -1px;  
+	white-space: nowrap; /* prevent input from going to next line */ 
+	width:auto; 
+	font-family:'Lato', sans-serif; 
+	position:relative; 
+}
+
+.fancyInput > div{ display:inline-block; }
+
+.fancyInput *:focus ~ .caret, .fancyInput *:focus ~ div .caret{ 
+	opacity:.8; 
+	box-shadow:0 0 8px #FFF; 
+	-webkit-animation:0.4s 40ms caret infinite; 
+	animation:0.4s 40ms caret infinite; 
+}
+.fancyInput .caret:only-child{  }
+.fancyInput .caret{ 
+	font-weight:normal; 
+	opacity:0; 
+	display:inline-block; 
+	width:3px; 
+	margin-left:-3px; 
+	background:#FFF; 
+	border-radius:4px; 
+	-moz-user-select:none; 
+}
+.fancyInput span:not(.deleted) ~ .caret{ position:absolute; margin:0; } /* only Caret which is  */
+
+/* lettes */
+.fancyInput > div span{ 
+	-webkit-transition-duration: 140ms;
+  	transition-duration: 140ms; 
+	display:inline-block; 
+	position:relative; 
+}
+.fancyInput > div .deleted{ 
+	opacity:0; 
+	-webkit-transition:140ms; 
+	transition:140ms; 
+	-webkit-transform:translateX(12px); 
+	transform:translateX(12px); 
+}
+
+/*.fancyInput > div span:last-of-type ~ br{ display:block; white-space:pre; }*/
+/*.fancyInput br:last-of-type + .caret{ position:static; display:inline-block; }*/
+		
+/* text effects */
+.fancyInput > div span.state1, .fancyInput > div span.state2 {
+    opacity: 0;
+    -webkit-transform: translateX(-10px);
+    transform: translateX(-10px); 
+}

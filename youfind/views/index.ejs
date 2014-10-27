@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width">
+	<title>YouFind</title>
+	<meta name="description" content="YouFind HomePage" />
+	<meta name="keywords" content="YouFind, Video Search, Image Search" />
+	<link rel="shortcut icon" href="../favicon.ico">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" />
+	<link rel="stylesheet" type="text/css" href="/vendor/fontawesome/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="/vendor/fancyInput/fancyInput.css">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
+</head>
+<body>
+	<div class="container">
+		<nav class="youfind-header">
+			<h1 class="youfind-title">YouFind</h1>
+			<p class="youfind-description">Best way to find your videos!</p>
+			<div class="text-field-1">
+				<!-- Fancy Input -->
+				<div>
+					<input type='text' id="searchTextField" />
+				</div><!--
+			 --><span><button type="button" class="image-button youfind-modal-trigger" data-modal="imageModal" id="imageButton">
+			 		<i class="fa fa-camera"></i>
+			 	</button></span><!--
+			 --><span><button type="button" class="search-button">
+			 		<i class="fa fa-search"></i>
+				</button></span>
+		 	</div>
+		</nav>
+
+		<div class="youfind-modal" id="imageModal">
+			<div class="youfind-modal-content">
+				<header class="youfind-modal-header">
+					<h3> Upload Image </h3>
+					<button class="youfind-modal-cancel">X</button>
+				</header>
+				<div>
+					<p><b>Paste image URL:</b></p>
+					<input type='text' id="imageURLTextField" />
+					<br>
+					<p><b>Or upload an image:</b></p>
+					<button type="button" class="upload-button">
+						<i class="fa fa-upload"></i> Upload
+						<input type='file' id="imageFileChooser" accept="image/gif, image/jpeg, image/jpg, image/png" />
+					</button>
+					<button class="youfind-modal-accept">Accept</button>
+				</div>
+			</div>
+		</div>
+		<div class="youfind-overlay"></div>
+	</div>
+	<script src="/vendor/jquery/jquery.min.js"></script>
+	<script src="/vendor/fancyInput/fancyInput.js"></script>
+	<script src="/javascripts/modal.js"></script>
+	<script src="/javascripts/main.js"></script>
+</body>
+
+</html>
