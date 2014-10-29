@@ -3,6 +3,7 @@ var App = App || {};
 App.main = (function(){
 	var hasSwitchedToSecondView = false
  	var currentImageURL = null;
+	var english = /^[A-Za-z0-9]*$/;
 
  	/* Reconfigure text field for search field after switching view */
 	function configureTextField(input){
@@ -73,8 +74,42 @@ App.main = (function(){
 		processImageSearch();
 	}
 
+	function isEnglish(text) {
+		for(var i = 0; i < text.length; i++){
+			if(text.charCodeAt(i) > 127)
+				return false;
+		}
+		return true;
+	}
+
+	function tokenizeText(text){
+
+		var tokenizedTexts = text.split(/[.,\/ -]/);
+		var filteredTerms = [];
+
+		for(var i = 0; i < tokenizedTexts.length; i++){
+			var token = tokenizedTexts[i];
+
+			if(!isEnglish(token)) continue;  //remove non_English terms
+				
+			var filteredTokens = token.match(/[A-Za-z0-9]+/g); //remove special characters
+			if(!filteredTokens) continue;
+			filteredTokens.forEach(function(filteredToken){ 
+				if(filteredToken != ""){
+					filteredTerms.push(filteredToken.toLowerCase());
+				}
+			})
+		}
+		return filteredTerms;
+	}
+
+
+
 	function processImageSearch() {
 		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;
+		var term_score_list = [];
+		var term_list = [];
+
 		$.ajax({
 			url: '/search',
 			type: 'GET',
@@ -82,13 +117,68 @@ App.main = (function(){
 				searchURL: googleImageSearchURL
 			},
 			success: function(data) {
-				var infos = $(data).find(".srg");
-				console.log(data);
+				var start = new Date();				
+				var bestGuess = $(data).find(".qb-b").text();
+				var searchResult = $(data).find(".srg");
+
+				var tokenizedBestGuess = tokenizeText(bestGuess);
+				appendToTermScoreList(tokenizedBestGuess, 5)
+
+				$(searchResult).find('.rc').each(function(){
+					var title = $(this).find('.r').text();
+					var content = $(this).find('.st').text();
+
+					//only consider English webpage
+					if(!isEnglish(title)) return;
+
+					var tokenizedTitle = tokenizeText(title);
+					var tokenizedContent = tokenizeText(content);
+
+					//add filtered terms to a final array
+					appendToTermScoreList(tokenizedTitle, 3);
+					appendToTermScoreList(tokenizedContent, 1, true);
+
+					console.log(title);
+					console.log("Best guess'\t"+tokenizedBestGuess);
+					console.log("Filtered titles\t"+tokenizedTitle);
+					console.log("Filtered contents\t"+tokenizedContent);
+					console.log($(this));
+				})
+			    term_score_list.sort(compare);
+				console.log("result");
+				var result = "";
+				term_score_list.forEach(function(term_score){
+					result += term_score.term+" "+term_score.score+"\t";
+				})
+				console.log(result);
+				var end = new Date();
+				console.log("Timing for Dom analysis:\t"+(end-start)+" ms");
 			},
 			error: function(data) {
 				console.log(data);
 			}
 		});
+
+		function appendToTermScoreList(array, score, isSortNeeded){
+
+			$.each(array, function(i, term){
+				var matchIndex = $.inArray(term, term_list)
+			    if(matchIndex === -1){
+					var term_score = {term: term, score: score};
+			    	term_score_list.push(term_score);
+			    	term_list.push(term);
+			    } else {
+			    	term_score_list[matchIndex].score += score;
+			    	if(term != term_score_list[matchIndex].term)
+			    		console.log("Match error "+term+" "+term_score_list[matchIndex].term+" "+matchIndex);
+			    }
+			});
+		}
+
+		function compare(term_score1, term_score2){
+			//sorted in descending order, so switch the order of the two terms
+			return term_score2.score - term_score1.score;
+		}
 	}
 
 	return {
