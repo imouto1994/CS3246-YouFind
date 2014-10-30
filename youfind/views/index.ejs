@@ -12,6 +12,9 @@
 	<link rel="stylesheet" type="text/css" href="/vendor/fontawesome/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="/vendor/fancyInput/fancyInput.css">
 	<link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
+	<script src="/javascripts/googleApi.js"></script>
+	<!-- JavaScript Google Client Library -->
+	<script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"></script>
 </head>
 <body>
 	<div class="container">
@@ -31,6 +34,9 @@
 				</button></span>
 		 	</div>
 		</nav>
+		<div class="grid">
+			<!-- Content to be appended -->
+		</div>
 
 		<div class="youfind-modal" id="imageModal">
 			<div class="youfind-modal-content">
@@ -40,7 +46,7 @@
 				</header>
 				<div>
 					<p><b>Paste image URL:</b></p>
-					<input type='text' id="imageURLTextField" value="http://images.politico.com/global/2012/04/120413_the_voice_ap_328.jpg"/>
+					<input type='text' id="imageURLTextField"/>
 					<br>
 					<p><b>Or upload an image:</b></p>
 					<button type="button" class="upload-button">

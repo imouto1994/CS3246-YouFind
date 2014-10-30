@@ -136,7 +136,8 @@ input {
 	background: #e74c3c;
 	padding-left: 2em;
 	padding-bottom: 5px;
-	height: 10%;
+	padding-top: 0;
+	height: 75px;
 	-webkit-transition: all 0.45s;
 	-moz-transition: all 0.45s;
 	transition: all 0.45s;
@@ -325,6 +326,50 @@ input#imageFileChooser {
 	-ms-transform: scale(1.0);
 	transform: scale(1.0);
 	opacity: 1.0;
+}
+
+/* Grid Result */
+.youfind-header ~ .grid {
+	height: 0;
+}
+
+.youfind-header-2 ~ .grid {
+	height: auto;
+	overflow: auto;
+	padding: 2em 3em;
+	margin: 0 auto;
+	text-align: center;
+}
+
+.grid i {
+	margin-top: 1em;
+	font-size: 6em; 
+	color: rgba(0, 0, 0, 0.45);
+}
+
+.grid ul {
+	height: auto;
+	overflow: auto;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.grid li {
+    width: 33.3%;
+    margin: 10px 0;
+    float: left;
+    cursor: pointer;
+}
+
+.grid figure {
+	margin: 0;
+	text-align: center;
+}
+
+.grid figure img {
+    display: block;
+    margin: 0 auto;
 }
 
 @media only screen and (max-width: 560px){
