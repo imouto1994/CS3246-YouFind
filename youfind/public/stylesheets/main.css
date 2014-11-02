@@ -372,6 +372,10 @@ input#imageFileChooser {
     margin: 0 auto;
 }
 
+.grid p, .grid h2 {
+	color:#111;
+}
+
 @media only screen and (max-width: 560px){
 	.youfind-header .search-button {
 		width: 85%%;

@@ -122,25 +122,55 @@ App.main = (function(){
 			request.execute(function(response) {
 				var result = response.result;
 				videos = []
+				var counter = 0;
 				for(index in result.items){
-					item = result.items[index];
-					video = {};
+					var item = result.items[index];
+					var video = {};
 					video.id = item.id.videoId;
 					video.title = item.snippet.title;
+					video.publishedAt = item.snippet.publishedAt;
 					video.description = item.snippet.description;
+					video.channelTitle = item.snippet.channelTitle;
 					video.thumbnail = item.snippet.thumbnails.medium.url;
-					videos.push(video);
+
+					searchStatistics(video, videos, result.items.length);
 				}
-				displayResults(videos);
 			});
+		}
+
+		function searchStatistics(video, videos, count){
+
+			var videoRequest = gapi.client.youtube.videos.list({
+				part: 'statistics',
+				id: video.id,
+			});
+
+			counter = 0;
+			videoRequest.execute(function(videoResponse){
+				var videoResult = videoResponse.result;
+				video.viewCount = videoResult.items[0].statistics.viewCount;
+				videos.push(video);
+				console.log(videoResult);
+				console.log(counter+" "+video.id);
+				//only display results when this is the last video
+				if(counter >= count - 1){
+					displayResults(videos);
+				}
+				counter++;
+			})
 		}
 
 		function displayResults(videos){
 			$('.grid').html('<ul></ul>');
 			for(index in videos){
 				video = videos[index];
-				html = '<li><figure><img src="' + video.thumbnail + '"></figure></li>';
+				html = '<li><figure><img src="' + video.thumbnail + '"></figure>';
+				html += '<h2>'+ video.title + '</h2>';
+				html += '<p>' + video.publishedAt + '</p>';
+				html += '<p>' + video.viewCount + '</p>';
+				html += '<p>'+ video.description + '</p></li>'
 				$('.grid ul').append(html);
+				console.log("date "+new Date(video.publishedAt));
 			}
 		}
 
