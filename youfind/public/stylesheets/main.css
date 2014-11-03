@@ -137,14 +137,16 @@ input {
 	padding-left: 2em;
 	padding-bottom: 5px;
 	padding-top: 0;
-	height: 75px;
+	height: 60px;
 	-webkit-transition: all 0.45s;
 	-moz-transition: all 0.45s;
 	transition: all 0.45s;
 }
 
 .youfind-header-2 .youfind-title {
-	display: inline-block;
+	display: block;
+	position: absolute;
+	left: 2%;
 	font-weight: 800;
 	font-size: 1.5em;
 	font-family: "Raleway", sans-serif;
@@ -155,9 +157,11 @@ input {
 }
 
 .text-field-2 {
-	display: inline-block;
+	display: block;
+	position: absolute;
+	top: 10px;
 	width: 70%;
-	margin-left: 5%;
+	margin-left: 10%;
 }
 
 /* Fancy Inputs */

@@ -7,8 +7,10 @@ App.main = (function(){
 
  	/* Reconfigure text field for search field after switching view */
 	function configureTextField(input){
-		window.fancyInput.setCaretHeight(input);
-		window.fancyInput.inputResize(input);
+		setTimeout(function(){
+			window.fancyInput.setCaretHeight(input);
+			window.fancyInput.inputResize(input);
+		}, 200);
 	}
 
 	/* Read uploaded image */
@@ -139,7 +141,9 @@ App.main = (function(){
 			$('.grid').html('<ul></ul>');
 			for(index in videos){
 				video = videos[index];
-				html = '<li><figure><img src="' + video.thumbnail + '"></figure></li>';
+				html  = '<li><figure>'
+				html += '<a href="https://www.youtube.com/watch?v=' + video.id + '" target="_blank">'
+				html += '<img src="' + video.thumbnail + '"></a></figure></li>';
 				$('.grid ul').append(html);
 			}
 		}

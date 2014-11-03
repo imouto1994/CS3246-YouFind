@@ -12,7 +12,7 @@ var search = require('./routes/search');
 
 var app = express();
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 2110);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 //app.use(favicon());
@@ -20,9 +20,9 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/search', search);
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(errorHandler());
 
 var server = http.createServer(app);
