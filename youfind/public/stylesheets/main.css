@@ -41,6 +41,11 @@ button {
     vertical-align: middle;
 }
 
+iframe {
+	width: 100%;
+	height: 360px;
+}
+
 input {
 	color: #fff; 
 	background: rgba(0, 0, 0, 0.1) ;
@@ -61,6 +66,10 @@ input {
 .youfind-header-2 .search-button {
 	font-size: 1.5em;
 	line-height: 1.6em;
+}
+
+#youfind-nav-bar {
+	z-index: 1000;
 }
 
 .search-button:hover, .search-button:active {
@@ -138,6 +147,8 @@ input {
 	padding-bottom: 5px;
 	padding-top: 0;
 	height: 60px;
+	position: fixed;
+	width: 100%;
 	-webkit-transition: all 0.45s;
 	-moz-transition: all 0.45s;
 	transition: all 0.45s;
@@ -262,7 +273,7 @@ input#imageFileChooser {
 	left: 0;
 	z-index: 1000;
 	opacity: 0;
-	background: rgba(0, 0, 0, 0.2);
+	background: rgba(0, 0, 0, 0.4);
 	-webkit-transition: all 0.3s;
 	-moz-transition: all 0.3s;
 	transition: all 0.3s;
@@ -281,6 +292,14 @@ input#imageFileChooser {
 	margin: 0;
 	font-weight: 300;
 	font-size: 1.15em;
+}
+
+.video-modal .youfind-modal-content {
+	background: transparent;
+}
+
+.video-modal .youfind-modal-content > div {
+	padding: 0;
 }
 
 .youfind-modal-content > div p {
@@ -338,6 +357,9 @@ input#imageFileChooser {
 }
 
 .youfind-header-2 ~ .grid {
+	position: absolute;
+	top: 60px;
+	width: 100%;
 	height: auto;
 	overflow: auto;
 	padding: 2em 3em;
@@ -345,7 +367,7 @@ input#imageFileChooser {
 	text-align: center;
 }
 
-.grid i {
+.grid .fa-spin {
 	margin-top: 1em;
 	font-size: 6em; 
 	color: rgba(0, 0, 0, 0.45);
@@ -367,17 +389,78 @@ input#imageFileChooser {
 }
 
 .grid figure {
-	margin: 0;
+	position: relative;
+	margin: 1em;
+	background: #e74c3c;
+}
+
+.grid figure .youfind-overlay {
+	position: absolute;
+}
+
+.grid .youfind-result-thumbnail {
+	z-index: 100;
+	position: relative;
 	text-align: center;
 }
 
+.grid .youfind-result-thumbnail:hover > .youfind-overlay {
+	visibility: visible;
+	opacity: 1.0;
+}
+
+.grid .play-button {
+	position: relative;
+	margin: 0 auto;
+	background: transparent;
+	font-size: 6em;
+	top: 25%;
+}
+
 .grid figure img {
+	width: 100%;
+	height: auto;
     display: block;
     margin: 0 auto;
 }
 
-.grid p, .grid h2 {
-	color:#111;
+.grid figcaption {
+	background: transparent;	
+	width: 100%;
+	text-align: left;
+	padding: 0.25em 0.75em;
+}
+
+.grid .youfind-result-title {
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.grid .youfind-result-channel::before {
+	content: 'by ' 
+}
+
+.grid .youfind-result-channel {
+		
+}
+
+.grid .youfind-result-date {
+	display: inline-block;
+	margin: 0 0.5em 0 0;
+	font-weight: 600;
+	font-size: 0.85em;
+}
+
+.grid .youfind-result-date::after {
+	content: '|';
+	margin-left: 1em;
+}
+
+.grid .youfind-result-views {
+	display: inline-block;
+	margin: 0 0 0.5em 0;
+	font-weight: 600;
+	font-size: 0.85em;
 }
 
 @media only screen and (max-width: 560px){
