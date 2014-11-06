@@ -7,8 +7,10 @@ App.main = (function(){
 
  	/* Reconfigure text field for search field after switching view */
 	function configureTextField(input){
-		window.fancyInput.setCaretHeight(input);
-		window.fancyInput.inputResize(input);
+		setTimeout(function(){
+			window.fancyInput.setCaretHeight(input);
+			window.fancyInput.inputResize(input);
+		}, 200);
 	}
 
 	/* Read uploaded image */
@@ -86,6 +88,7 @@ App.main = (function(){
 				searchURL: googleImageSearchURL
 			},
 			beforeSend: function() {
+				$(".video-modal").remove();
 				$('.grid ul').empty();
 				$('.grid').html('<i class="fa fa-circle-o-notch fa-spin"></i>');
 			},
@@ -164,14 +167,44 @@ App.main = (function(){
 			$('.grid').html('<ul></ul>');
 			for(index in videos){
 				video = videos[index];
-				html = '<li><figure><img src="' + video.thumbnail + '"></figure>';
-				html += "<h2 class='title'>"+ video.title + "</h2>";
-				html += "<p class='time'>" + video.publishedAt + "</p>";
-				html += "<p class='viewCount'>" + video.viewCount + '</p>';
-				html += "<p class=''description'>" + video.description + '</p></li>'
-				$('.grid ul').append(html);
-				console.log("date "+new Date(video.publishedAt));
+				var html = "<li>"
+				html +=	"<figure>"
+				html +=		'<div class="youfind-result-thumbnail">'
+				html += 		'<div class="youfind-overlay">'
+				html += 			'<button type="button" value="' +  video.id + '" class="play-button youfind-modal-trigger" data-modal="videoModal-' + index + '">'
+				html +=					'<i class="fa fa-play-circle"></i>'
+				html +=     		'</button>'
+				html += 		'</div>'
+				html += 		'<img src="' + video.thumbnail + '">'
+				html +=		'</div>'
+				html +=		'<figcaption>'
+				html +=			'<h3 class="youfind-result-title">' + video.title + '</h3>'
+				html += 		'<p class="youfind-result-channel">' + video.channelTitle + '</p>'
+				html += 		'<p class="youfind-result-date">' + video.publishedAt.substr(0, video.publishedAt.indexOf("T")) + '</p>'
+				html +=			'<p class="youfind-result-views">' + video.viewCount + ' views</p>'
+				html += 	'</figcaption>'
+			 	html += '</figure>'
+				html += '</li>'
+			 	$('.grid ul').append(html);
+
+			 	html = '<div class="youfind-modal video-modal" id="videoModal-' + index+ '">'
+				html += 	'<div class="youfind-modal-content">'
+				html += 		'<div>'
+				html += 			'<iframe id="resultPlayer" frameBorder="0" '
+				html += 					'src="http://www.youtube.com/embed/' + video.id + '">'
+				html += 			'</iframe>'
+				html += 		'</div>'
+				html += 	'</div>'
+				html += '</div>'
+				$(html).insertAfter('#imageModal');
 			}
+			bindPlayButtons();
+		}
+
+		function bindPlayButtons(){
+			$('.play-button').each(function(){
+				App.modal.linkModal(this);
+			})
 		}
 
 		function extractTerms(data) {
@@ -222,7 +255,7 @@ App.main = (function(){
 			appendToTermScoreList(tokenizedTitle, 3);
 			appendToTermScoreList(tokenizedDescription, 1);
 			termScoresList.sort(compare);
-			var result = "";
+		var result = "";
 			termScoresList.forEach(function(termScore){
 				result += termScore.term+" "+termScore.score+"\t";
 			})

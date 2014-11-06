@@ -18,7 +18,7 @@
 </head>
 <body>
 	<div class="container">
-		<nav class="youfind-header">
+		<nav class="youfind-header" id="youfind-nav-bar">
 			<h1 class="youfind-title">YouFind</h1>
 			<p class="youfind-description">Best way to find your videos!</p>
 			<div class="text-field-1">
@@ -34,30 +34,34 @@
 				</button></span>
 		 	</div>
 		</nav>
-		<div class="grid">
-			<!-- Content to be appended -->
-		</div>
 
-		<div class="youfind-modal" id="imageModal">
-			<div class="youfind-modal-content">
-				<header class="youfind-modal-header">
-					<h3> Upload Image </h3>
-					<button class="youfind-modal-cancel">X</button>
-				</header>
-				<div>
-					<p><b>Paste image URL:</b></p>
-					<input type='text' id="imageURLTextField"/>
-					<br>
-					<p><b>Or upload an image:</b></p>
-					<button type="button" class="upload-button">
-						<i class="fa fa-upload"></i> Upload
-						<input type='file' id="imageFileChooser" accept="image/gif, image/jpeg, image/jpg, image/png" />
-					</button>
-					<button class="youfind-modal-accept">Accept</button>
+		<div class="grid">
+		
+		</div>
+		
+		<div id="modalSets">
+			<div class="youfind-modal" id="imageModal">
+				<div class="youfind-modal-content">
+					<header class="youfind-modal-header">
+						<h3 class="youfind-modal-title"> Upload Image </h3>
+						<button class="youfind-modal-cancel">X</button>
+					</header>
+					<div>
+						<p><b>Paste image URL:</b></p>
+						<input type='text' id="imageURLTextField"/>
+						<br>
+						<p><b>Or upload an image:</b></p>
+						<button type="button" class="upload-button">
+							<i class="fa fa-upload"></i> Upload
+							<input type='file' id="imageFileChooser" accept="image/gif, image/jpeg, image/jpg, image/png" />
+						</button>
+						<button class="youfind-modal-accept">Accept</button>
+					</div>
 				</div>
 			</div>
+			
+			<div class="youfind-overlay"></div>
 		</div>
-		<div class="youfind-overlay"></div>
 	</div>
 	<script src="/vendor/jquery/jquery.min.js"></script>
 	<script src="/vendor/fancyInput/fancyInput.js"></script>
