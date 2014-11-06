@@ -165,10 +165,10 @@ App.main = (function(){
 			for(index in videos){
 				video = videos[index];
 				html = '<li><figure><img src="' + video.thumbnail + '"></figure>';
-				html += '<h2>'+ video.title + '</h2>';
-				html += '<p>' + video.publishedAt + '</p>';
-				html += '<p>' + video.viewCount + '</p>';
-				html += '<p>'+ video.description + '</p></li>'
+				html += "<h2 class='title'>"+ video.title + "</h2>";
+				html += "<p class='time'>" + video.publishedAt + "</p>";
+				html += "<p class='viewCount'>" + video.viewCount + '</p>';
+				html += "<p class=''description'>" + video.description + '</p></li>'
 				$('.grid ul').append(html);
 				console.log("date "+new Date(video.publishedAt));
 			}
@@ -211,6 +211,21 @@ App.main = (function(){
 			console.log(result);
 			var end = new Date();
 			console.log("Timing for Dom analysis:\t"+(end-start)+" ms");
+		}
+
+		function relevanceFeedback(index){
+			var video = $(".grid ul").eq(index);
+			var videoTitle = $(video).find(".title");
+			var videoDescription = $(video).find("description");
+			var tokenizedTitle = tokenizeText(videoTitle);
+			var tokenizedDescription = tokenizeText(videoDescription);
+			appendToTermScoreList(tokenizedTitle, 3);
+			appendToTermScoreList(tokenizedDescription, 1);
+			termScoresList.sort(compare);
+			var result = "";
+			termScoresList.forEach(function(termScore){
+				result += termScore.term+" "+termScore.score+"\t";
+			})
 		}
 
 		function appendToTermScoreList(array, score, isSortNeeded){
