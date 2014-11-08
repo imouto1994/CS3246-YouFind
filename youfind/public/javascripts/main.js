@@ -348,6 +348,23 @@ App.main = (function(){
 				switchToSecondView($('#searchTextField'));
 				search();
 			});
+		},
+		detectUrlQuery: function(){
+			var imageUrlQuery = $("#imageUrl").text();
+			//Detect whether the http request is sent with image url query (in most case, via chrome extension)
+			if(imageUrlQuery!= "undefined"){
+				imageExists(imageUrlQuery, function(isValid){
+					if(isValid){
+						currentImageURL = imageUrlQuery;
+						App.modal.removeAllModals();
+						switchToSecondView(imageUrlQuery);
+						search();
+					} else {
+						// TODO: add notifications to user
+						console.log('Invalid URL');
+					}
+				});
+			};
 		}
 	}
 })();
@@ -358,4 +375,5 @@ $(document).ready(function(){
 	App.main.bindUploadButton();
 	App.main.bindAcceptButton();
 	App.main.bindSearchButton();
+	App.main.detectUrlQuery();
 });

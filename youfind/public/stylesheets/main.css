@@ -463,6 +463,10 @@ input#imageFileChooser {
 	font-size: 0.85em;
 }
 
+#imageUrl{
+	display: none;
+}
+
 @media only screen and (max-width: 560px){
 	.youfind-header .search-button {
 		width: 85%%;
