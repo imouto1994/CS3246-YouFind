@@ -182,7 +182,7 @@ App.main = (function(){
 				html += 		'<p class="youfind-result-channel">' + video.channelTitle + '</p>'
 				html += 		'<p class="youfind-result-date">' + video.publishedAt.substr(0, video.publishedAt.indexOf("T")) + '</p>'
 				html +=			'<p class="youfind-result-views">' + video.viewCount + ' views</p>'
-				html +=			'<div class="g-ytsubscribe">'+ video.channelTitle +'</div>'
+				html +=			'<div class="g-ytsubscribe"></div>'
 				html += 	'</figcaption>'
 			 	html += '</figure>'
 				html += '</li>'
@@ -212,7 +212,10 @@ App.main = (function(){
 		function addSubscrButtons(){
 			$.getScript("https://apis.google.com/js/platform.js");
 			$(".g-ytsubscribe").each(function(index, element){
-				$(this).attr("data-channel", $(this).text());
+				var channelTitle = $(this).siblings(".youfind-result-channel").text();
+				if(channelTitle != ""){
+					$(this).attr("data-channel", channelTitle);
+				}
 			})
 		}
 
