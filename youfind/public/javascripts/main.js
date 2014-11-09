@@ -114,11 +114,18 @@ App.main = (function(){
 				}
 			}
 			console.log("Query String: " + str);
+
+			var order = 'relevance';
+			var selectedOrder = $("input[type='radio'][name='order']:checked");
+			if(selectedOrder.length > 0){
+				order = selectedOrder.val();
+			}
+			console.log(order);
 			var request = gapi.client.youtube.search.list({
 				part: 'snippet',
 				q: str.trim(),
 				maxResults: 10,
-				order: 'relevance',
+				order: order,
 				type: 'video',
 			});
 			request.execute(function(response) {
@@ -170,7 +177,7 @@ App.main = (function(){
 				html +=	"<figure>"
 				html +=		'<div class="youfind-result-thumbnail">'
 				html += 		'<div class="youfind-overlay">'
-				html += 			'<button type="button" value="' +  video.id + '" class="play-button youfind-modal-trigger" data-modal="videoModal">'
+				html += 			'<button type="button" value="' +  video.id + '" class="button play-button youfind-modal-trigger" data-modal="videoModal">'
 				html +=					'<i class="fa fa-play-circle"></i>'
 				html +=     		'</button>'
 				html += 		'</div>'

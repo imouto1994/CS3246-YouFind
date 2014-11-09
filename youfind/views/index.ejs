@@ -16,7 +16,11 @@
 </head>
 <body>
 	<div class="container">
-		<button type="button" class="button login-button">
+		<button type="button" class="button round-button settings-button youfind-modal-trigger"
+						data-modal="settingsModal" id="settingsButton">
+			<i class="fa fa-gear"></i>
+		</button>
+		<button type="button" class="button round-button login-button">
 			<i class="fa fa-google-plus"></i>
 		</button>
 		<nav class="youfind-header" id="youfind-nav-bar">
@@ -80,7 +84,11 @@
 						<button class="button youfind-modal-cancel">X</button>
 					</header>
 					<div>
-
+						<input type="radio" name="order" value="relevance" checked="checked"> Relevance
+						<input type="radio" name="order" value="rating"> Rating
+						<input type="radio" name="order" value="date"> Date
+						<input type="radio" name="order" value="title"> Title
+						<input type="radio" name="order" value="viewCount"> Views
 					</div>
 				</div>
 			</div>

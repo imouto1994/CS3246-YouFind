@@ -35,4 +35,5 @@ App.modal = (function(){
 $(document).ready(function(){
 	App.modal.linkOverlay();
 	App.modal.linkModal($('#imageButton'));
+	App.modal.linkModal($('#settingsButton'));
 });

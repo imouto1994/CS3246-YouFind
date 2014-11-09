@@ -176,16 +176,19 @@ input {
 }
 
 /* Login Button */
-.login-button {
+.round-button {
 	display: block;
-	position: fixed;
-	top: 0.35em;
-	right: 1.0em;	
 	border-radius: 50%;
 	font-size: 1em;
 	width: 3em;
 	height: 3em;
 	line-height: 3em;
+}
+
+.login-button {
+	position: fixed;
+	top: 0.35em;
+	right: 1.0em;	
 	z-index: 1200;
 	-webkit-transition: all .25s;
 	   -moz-transition: all .25s;
@@ -195,6 +198,35 @@ input {
 }
 
 .login-button:hover {
+	background: #e74c3c;
+	-webkit-transform: scale(1.2, 1.2);
+	   -moz-transform: scale(1.2, 1.2);
+	    -ms-transform: scale(1.2, 1.2);
+	     -o-transform: scale(1.2, 1.2);
+	        transform: scale(1.2, 1.2);
+}
+
+.settings-button {
+	position: fixed;
+	top: 0.35em;
+	right: 5em;
+	z-index: 1200;
+	-webkit-transition: all .25s;
+	   -moz-transition: all .25s;
+	    -ms-transition: all .25s;
+	     -o-transition: all .25s;
+	        transition: all .25s;
+}
+
+.settings-button i {
+	-webkit-transform: scale(1.5, 1.5);
+	   -moz-transform: scale(1.5, 1.5);
+	    -ms-transform: scale(1.5, 1.5);
+	     -o-transform: scale(1.5, 1.5);
+	        transform: scale(1.5, 1.5);
+}
+
+.settings-button:hover {
 	background: #e74c3c;
 	-webkit-transform: scale(1.2, 1.2);
 	   -moz-transform: scale(1.2, 1.2);
@@ -448,6 +480,8 @@ input#imageFileChooser {
 }
 
 .youfind-header-2 ~ .grid {
+	color: #fff;
+	font-family: 'Lato', Arial, sans-serif;
 	position: absolute;
 	top: 60px;
 	width: 100%;
@@ -515,7 +549,7 @@ input#imageFileChooser {
     margin: 0 auto;
 }
 
-.grid figcaption {
+.grid figcaption {	
 	background: transparent;	
 	width: 100%;
 	text-align: left;
@@ -576,14 +610,3 @@ input#imageFileChooser {
 		min-width: 50%;
 	}
 }
-
-@media only screen and (max-width: 420px){
-	.youfind-header-2 .youfind-title {
-		font-size: 1em;
-	}
-
-	.text-field-2 {
-		padding-top: 0;
-	}
-}
-
