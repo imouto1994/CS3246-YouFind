@@ -14,7 +14,6 @@
 	<link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
 	<script src="/javascripts/googleApi.js"></script>
 	<!-- JavaScript Google Client Library -->
-	<script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"></script>
 </head>
 <body>
 	<div class="container">
@@ -31,6 +30,9 @@
 			 	</button></span><!--
 			 --><span><button type="button" class="search-button">
 			 		<i class="fa fa-search"></i>
+				</button></span>
+				<span><button type="button" class="login-button">
+			 		<i class="fa fa-google-plus"></i>
 				</button></span>
 		 	</div>
 		</nav>
@@ -70,6 +72,8 @@
 			<div class="youfind-overlay"></div>
 		</div>
 	</div>
+	<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+	<script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"></script>
 	<script src="/vendor/jquery/jquery.min.js"></script>
 	<script src="/vendor/swfobject/swfobject/src/swfobject.js"></script>
 	<script src="/vendor/fancyInput/fancyInput.js"></script>
