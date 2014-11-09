@@ -1,15 +1,8 @@
 var GOOGLE_API_KEY = "AIzaSyDjR_Icuc789VOUUdapZJ5fHroLQ7bU8zA"
 
 googleApiClientReady = function() {
-	function loadYoutubeDataApi(){
-		gapi.client.load('youtube', 'v3', function() {
-			console.log("Load Youtube API successfully")
-  		});
-	}
-	console.log('API Client Ready');
 	gapi.client.setApiKey(GOOGLE_API_KEY);
-	loadYoutubeDataApi();
-	// triggerAuth();
+	triggerAuth();
 }
 
 
@@ -56,7 +49,6 @@ function handleAuthResult(authResult) {
     // Make the #login-link clickable. Attempt a non-immediate OAuth 2.0
     // client flow. The current function is called when that flow completes.
     $('.login-button').click(function() {
-    	console.log("clicked");
       gapi.auth.authorize({
         client_id: OAUTH2_CLIENT_ID,
         scope: OAUTH2_SCOPES,
@@ -72,7 +64,7 @@ function handleAuthResult(authResult) {
 function loadAPIClientInterfaces() {
   gapi.client.load('youtube', 'v3', function() {
   	//handler
-  	console.log("pass gapi auth");
+    console.log("Load Youtube API successfully")
   });
 }
 

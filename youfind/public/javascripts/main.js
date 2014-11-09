@@ -320,9 +320,6 @@ App.main = (function(){
 	}
 
 	return {
-		initializeFancyInput: function(){
-			$('#searchTextField').fancyInput();
-		},
 		initializeYoutubePlayer: function(){
 			var params = { allowScriptAccess: "always", allowFullScreen: "true"};
     	var atts = { id: "resultPlayer"};
@@ -383,7 +380,6 @@ App.main = (function(){
 })();
 
 $(document).ready(function(){
-	App.main.initializeFancyInput();
 	App.main.initializeYoutubePlayer();
 	App.main.bindEnterKey();
 	App.main.bindUploadButton();

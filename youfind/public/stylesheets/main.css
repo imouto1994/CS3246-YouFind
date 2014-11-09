@@ -13,20 +13,50 @@ html { height:100%; }
 body { position:absolute; top:0; bottom:0; right:0; left:0; }
 
 body {
-	background: #f9f6e5;
-	color: #faf1e0;
+	background: #fff;
+	color: #e74c3c;
 	font-size: 100%;
 	line-height: 1.25;
 	font-weight: 300;
-	font-family: 'Lato', Arial, sans-serif;
+	font-family: 'Raleway', Arial, sans-serif;
 }
 
 .container {	
 	height: 100%;
 }
 
+#youfind-nav-bar {
+	z-index: 1000;
+}
+
+.youfind-header .youfind-logo {
+	display: inline-block;
+	vertical-align: bottom;
+}
+
+.youfind-header-2 .youfind-logo {
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+	height: 100%;
+}
+
+.youfind-header .youfind-logo img {
+	content: url('/images/redBgIcon.png') no-repeat;
+	height: 50px;
+	width: auto;
+}
+
+.youfind-header-2 .youfind-logo img {
+	content: url('/images/whiteBgIcon.png') no-repeat;
+	height: 45px;
+	width: auto;
+}
+
 /* UI Controls */
-button {
+.button {
+	background: #c0392b;
+	color: #fff;
 	position: relative;
 	padding: 0 1em;
 	border: none;
@@ -36,9 +66,8 @@ button {
 	overflow: hidden;
 	text-decoration: none;
 	outline: none;
-	background: #c0392b;
-	color: #f9f6e5;
-    vertical-align: middle;
+  vertical-align: middle;
+  cursor: pointer;
 }
 
 #resultPlayer {
@@ -57,10 +86,15 @@ input {
 	font-size: 1.25em;
 }
 
-/* Buttons */
+  /*******************************************************/	
+ /*											BUTTONS 											  */
+/*******************************************************/	
+
+/* Search Button */
 .youfind-header .search-button {
+	background: #c0392b;
 	font-size: 2em;
-	line-height: 2.0em;
+	line-height: 2.0em;	
 }
 
 .youfind-header-2 .search-button {
@@ -68,17 +102,26 @@ input {
 	line-height: 1.6em;
 }
 
-#youfind-nav-bar {
-	z-index: 1000;
+.search-button i {
+	-webkit-transition: all 0.25s;
+	   -moz-transition: all 0.25s;
+	    -ms-transition: all 0.25s;
+	     -o-transition: all 0.25s;
+	        transition: all 0.25s;
 }
 
-.search-button:hover, .search-button:active {
-	background: #f9f6e5;
-	color: #c0392b;
+.search-button:hover i, .search-button:active i {
+	-webkit-transform: rotate(90deg) scale(1.1, 1.1);
+	   -moz-transform: rotate(90deg) scale(1.1, 1.1);
+	    -ms-transform: rotate(90deg) scale(1.1, 1.1);
+	     -o-transform: rotate(90deg) scale(1.1, 1.1);
+	        transform: rotate(90deg) scale(1.1, 1.1);
 }
 
+/* Image Button */
 .youfind-header .image-button {
-	background: rgba(0, 0, 0, 0.1);
+	background: #e74c3c;
+	color: rgba(0, 0, 0, 0.4);
 	font-size: 2em;
 	padding: 0 0.25em;
 	line-height: 2.0em;
@@ -86,11 +129,25 @@ input {
 
 .youfind-header-2 .image-button {
 	background: rgba(0, 0, 0, 0.1);
+	color: rgba(0, 0, 0, 0.4);
 	font-size: 1.5em;
 	padding: 0 0.25em;
 	line-height: 1.6em;
 }
 
+.image-button {
+	-webkit-transition: color 0.25s;
+	   -moz-transition: color 0.25s;
+	    -ms-transition: color 0.25s;
+	     -o-transition: color 0.25s;
+	        transition: color 0.25s;
+}
+
+.image-button:hover {
+	color: #fff;
+}
+
+/* Upload Button */
 .upload-button {
 	font-size: 1em;
 	line-height: 2.0em;
@@ -99,6 +156,7 @@ input {
 	overflow: hidden;
 }
 
+/* Modal Cancel Button */
 .youfind-modal-cancel {
 	position: absolute;
 	top: 0;
@@ -108,6 +166,7 @@ input {
 	padding: 0 0.5em;
 }
 
+/* Modal Accept Button */
 .youfind-modal-accept {
 	margin: 0 auto;
 	margin-top: 2em;
@@ -116,11 +175,42 @@ input {
 	padding: 0.5em 1.5em;
 }
 
-/* Header Section */
+/* Login Button */
+.login-button {
+	display: block;
+	position: fixed;
+	top: 0.35em;
+	right: 1.0em;	
+	border-radius: 50%;
+	font-size: 1em;
+	width: 3em;
+	height: 3em;
+	line-height: 3em;
+	z-index: 1200;
+	-webkit-transition: all .25s;
+	   -moz-transition: all .25s;
+	    -ms-transition: all .25s;
+	     -o-transition: all .25s;
+	        transition: all .25s;
+}
+
+.login-button:hover {
+	background: #e74c3c;
+	-webkit-transform: scale(1.2, 1.2);
+	   -moz-transform: scale(1.2, 1.2);
+	    -ms-transform: scale(1.2, 1.2);
+	     -o-transform: scale(1.2, 1.2);
+	        transform: scale(1.2, 1.2);
+}
+
+  /*******************************************************/	
+ /*											HEADERS											  	*/
+/*******************************************************/
+
 .youfind-header {
 	margin: 0 auto;
 	padding: 2em;
-	background: #e74c3c;
+	background: #fff;
 	padding-top: 10em;
 	height: 100%;
 	text-align: center;
@@ -131,6 +221,7 @@ input {
 	font-weight: 800;
 	font-size: 3em;
 	font-family: "Raleway", sans-serif;
+	display: inline-block;
 }
 
 .youfind-header .youfind-description {
@@ -143,6 +234,7 @@ input {
 .youfind-header-2 {
 	margin: 0 auto;
 	background: #e74c3c;
+	color: #fff;
 	padding-left: 2em;
 	padding-bottom: 5px;
 	padding-top: 0;
@@ -155,9 +247,8 @@ input {
 }
 
 .youfind-header-2 .youfind-title {
-	display: block;
-	position: absolute;
-	left: 2%;
+	display: inline-block;
+	position: relative;
 	font-weight: 800;
 	font-size: 1.5em;
 	font-family: "Raleway", sans-serif;
@@ -172,7 +263,7 @@ input {
 	position: absolute;
 	top: 10px;
 	width: 70%;
-	margin-left: 10%;
+	margin-left: 15%;
 }
 
 /* Fancy Inputs */
@@ -188,8 +279,8 @@ input {
 	text-align: left; 
 	padding: 7px 0;
 	padding-left: 0.5em; 
-	background: rgba(0,0,0,.1); 
-    vertical-align: middle;
+	background: #e74c3c; 
+  vertical-align: middle;
 }
 
 .youfind-header-2 .fancyInput{ 
@@ -205,7 +296,7 @@ input {
 	padding: 7px 0;
 	padding-left: 0.5em; 
 	background: rgba(0,0,0,.1); 
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
 .fancyInput input{ 
@@ -271,7 +362,7 @@ input#imageFileChooser {
 	visibility: hidden;
 	top: 0;
 	left: 0;
-	z-index: 1000;
+	z-index: 1500;
 	opacity: 0;
 	background: rgba(0, 0, 0, 0.65);
 	-webkit-transition: all 0.3s;
