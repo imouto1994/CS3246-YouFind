@@ -182,6 +182,7 @@ App.main = (function(){
 				html += 		'<p class="youfind-result-channel">' + video.channelTitle + '</p>'
 				html += 		'<p class="youfind-result-date">' + video.publishedAt.substr(0, video.publishedAt.indexOf("T")) + '</p>'
 				html +=			'<p class="youfind-result-views">' + video.viewCount + ' views</p>'
+				html +=			'<div class="g-ytsubscribe">'+ video.channelTitle +'</div>'
 				html += 	'</figcaption>'
 			 	html += '</figure>'
 				html += '</li>'
@@ -199,11 +200,19 @@ App.main = (function(){
 				$(html).insertAfter('#imageModal');
 			}
 			bindPlayButtons();
+			addSubscrButtons();
 		}
 
 		function bindPlayButtons(){
 			$('.play-button').each(function(){
 				App.modal.linkModal(this);
+			})
+		}
+
+		function addSubscrButtons(){
+			$.getScript("https://apis.google.com/js/platform.js");
+			$(".g-ytsubscribe").each(function(index, element){
+				$(this).attr("data-channel", $(this).text());
 			})
 		}
 
