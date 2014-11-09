@@ -41,7 +41,7 @@ button {
     vertical-align: middle;
 }
 
-iframe {
+#resultPlayer {
 	width: 100%;
 	height: 360px;
 }
@@ -273,7 +273,7 @@ input#imageFileChooser {
 	left: 0;
 	z-index: 1000;
 	opacity: 0;
-	background: rgba(0, 0, 0, 0.4);
+	background: rgba(0, 0, 0, 0.65);
 	-webkit-transition: all 0.3s;
 	-moz-transition: all 0.3s;
 	transition: all 0.3s;

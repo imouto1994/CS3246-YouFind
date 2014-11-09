@@ -17,6 +17,7 @@
   "dependencies": {
     "jquery": "components/jquery#~2.1.1",
     "fancyInput": "~1.2.0",
-    "fontawesome": "~4.2.0"
+    "fontawesome": "~4.2.0",
+    "swfobject": "*"
   }
 }

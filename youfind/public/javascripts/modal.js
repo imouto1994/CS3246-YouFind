@@ -8,6 +8,10 @@ App.modal = (function(){
 
 	function removeAllModals() {
 		$('.youfind-modal').removeClass('youfind-show');
+		var player = document.getElementById('resultPlayer');
+		if(player){
+			player.stopVideo();
+		}
 	}
 
 	return {

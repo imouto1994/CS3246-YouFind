@@ -88,7 +88,6 @@ App.main = (function(){
 				searchURL: googleImageSearchURL
 			},
 			beforeSend: function() {
-				$(".video-modal").remove();
 				$('.grid ul').empty();
 				$('.grid').html('<i class="fa fa-circle-o-notch fa-spin"></i>');
 			},
@@ -171,7 +170,7 @@ App.main = (function(){
 				html +=	"<figure>"
 				html +=		'<div class="youfind-result-thumbnail">'
 				html += 		'<div class="youfind-overlay">'
-				html += 			'<button type="button" value="' +  video.id + '" class="play-button youfind-modal-trigger" data-modal="videoModal-' + index + '">'
+				html += 			'<button type="button" value="' +  video.id + '" class="play-button youfind-modal-trigger" data-modal="videoModal">'
 				html +=					'<i class="fa fa-play-circle"></i>'
 				html +=     		'</button>'
 				html += 		'</div>'
@@ -186,23 +185,19 @@ App.main = (function(){
 			 	html += '</figure>'
 				html += '</li>'
 			 	$('.grid ul').append(html);
-
-			 	html = '<div class="youfind-modal video-modal" id="videoModal-' + index+ '">'
-				html += 	'<div class="youfind-modal-content">'
-				html += 		'<div>'
-				html += 			'<iframe id="resultPlayer" frameBorder="0" '
-				html += 					'src="http://www.youtube.com/embed/' + video.id + '">'
-				html += 			'</iframe>'
-				html += 		'</div>'
-				html += 	'</div>'
-				html += '</div>'
-				$(html).insertAfter('#imageModal');
 			}
 			bindPlayButtons();
 		}
 
 		function bindPlayButtons(){
 			$('.play-button').each(function(){
+				$(this).on('click', function(e){
+					console.log("TEST");
+					var player = document.getElementById('resultPlayer');
+					if(player){
+						player.loadVideoById($(this).attr('value'));
+					}
+				})
 				App.modal.linkModal(this);
 			})
 		}
@@ -316,6 +311,12 @@ App.main = (function(){
 		initializeFancyInput: function(){
 			$('#searchTextField').fancyInput();
 		},
+		initializeYoutubePlayer: function(){
+			var params = { allowScriptAccess: "always", allowFullScreen: "true"};
+    	var atts = { id: "resultPlayer"};
+    	swfobject.embedSWF("http://www.youtube.com/v/M7lc1UVf-VE?enablejsapi=1&playerapiid=ytplayer&version=3","youtube-api-player", "640", "360", "8", null, null, params, atts);
+    	console.log("Load Youtube Player Successfully");
+		},
 		bindEnterKey: function() {
 			$("#searchTextField").on('keypress', function(e){
 				if(e.which == 13){ // is 'Enter' key
@@ -371,6 +372,7 @@ App.main = (function(){
 
 $(document).ready(function(){
 	App.main.initializeFancyInput();
+	App.main.initializeYoutubePlayer();
 	App.main.bindEnterKey();
 	App.main.bindUploadButton();
 	App.main.bindAcceptButton();

@@ -36,10 +36,18 @@
 		</nav>
 		<p id="imageUrl"><%= imageUrl %></p>
 		<div class="grid">
-		
+			
 		</div>
 		
 		<div id="modalSets">
+			<div class="youfind-modal video-modal" id="videoModal">
+				<div class="youfind-modal-content">		
+					<div id="youtube-api-player">
+						<!-- IFrame to be appended -->
+					</div>		
+				</div>
+			</div>
+
 			<div class="youfind-modal" id="imageModal">
 				<div class="youfind-modal-content">
 					<header class="youfind-modal-header">
@@ -59,11 +67,11 @@
 					</div>
 				</div>
 			</div>
-			
 			<div class="youfind-overlay"></div>
 		</div>
 	</div>
 	<script src="/vendor/jquery/jquery.min.js"></script>
+	<script src="/vendor/swfobject/swfobject/src/swfobject.js"></script>
 	<script src="/vendor/fancyInput/fancyInput.js"></script>
 	<script src="/javascripts/modal.js"></script>
 	<script src="/javascripts/main.js"></script>
