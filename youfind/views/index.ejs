@@ -8,67 +8,109 @@
 	<meta name="description" content="YouFind HomePage" />
 	<meta name="keywords" content="YouFind, Video Search, Image Search" />
 	<link rel="shortcut icon" href="../favicon.ico">
+	<!-- Stylesheets -->
 	<link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" />
 	<link rel="stylesheet" type="text/css" href="/vendor/fontawesome/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="/vendor/fancyInput/fancyInput.css">
 	<link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
-	<script src="/javascripts/googleApi.js"></script>
-	<!-- JavaScript Google Client Library -->
+
+	<!-- JQuery -->
+	<script src="/vendor/jquery/jquery.min.js"></script>
+	<!-- Fancy Input -->
+	<script src="/vendor/fancyInput/fancyInput.js"></script>
 </head>
 <body>
 	<div class="container">
+		<button type="button" class="button round-button settings-button youfind-modal-trigger"
+						data-modal="settingsModal" id="settingsButton">
+			<i class="fa fa-gear"></i>
+		</button>
+		<button type="button" class="button round-button login-button">
+			<i class="fa fa-google-plus"></i>
+		</button>
 		<nav class="youfind-header" id="youfind-nav-bar">
+			<a class="youfind-logo" href="/">
+				<img></img>
+			</a>
 			<h1 class="youfind-title">YouFind</h1>
-			<p class="youfind-description">Best way to find your videos!</p>
+			<p class="youfind-description">Best way to visually find your videos!</p>
 			<div class="text-field-1">
 				<!-- Fancy Input -->
 				<div>
 					<input type='text' id="searchTextField" />
 				</div><!--
-			 --><span><button type="button" class="image-button youfind-modal-trigger" data-modal="imageModal" id="imageButton">
+			 --><span><button type="button" class="button image-button youfind-modal-trigger" 
+			 									data-modal="imageModal" id="imageButton">
 			 		<i class="fa fa-camera"></i>
 			 	</button></span><!--
-			 --><span><button type="button" class="search-button">
+			 --><span><button type="button" class="button search-button">
 			 		<i class="fa fa-search"></i>
-				</button></span>
-				<span><button type="button" class="login-button">
-			 		<i class="fa fa-google-plus"></i>
 				</button></span>
 		 	</div>
 		</nav>
 		<p id="imageUrl"><%= imageUrl %></p>
 		<div class="grid">
-		
+			
 		</div>
 		
 		<div id="modalSets">
+			<div class="youfind-modal video-modal" id="videoModal">
+				<div class="youfind-modal-content">		
+					<div id="youtube-api-player">
+						<!-- IFrame to be appended -->
+					</div>		
+				</div>
+			</div>
+
 			<div class="youfind-modal" id="imageModal">
 				<div class="youfind-modal-content">
 					<header class="youfind-modal-header">
 						<h3 class="youfind-modal-title"> Upload Image </h3>
-						<button class="youfind-modal-cancel">X</button>
+						<button class="button youfind-modal-cancel">X</button>
 					</header>
 					<div>
 						<p><b>Paste image URL:</b></p>
 						<input type='text' id="imageURLTextField" />
 						<br>
 						<p><b>Or upload an image:</b></p>
-						<button type="button" class="upload-button">
+						<button type="button" class="button upload-button">
 							<i class="fa fa-upload"></i> Upload
-							<input type='file' id="imageFileChooser" accept="image/gif, image/jpeg, image/jpg, image/png" />
+							<input 	type='file' id="imageFileChooser" 
+											accept="image/gif, image/jpeg, image/jpg, image/png" />
 						</button>
-						<button class="youfind-modal-accept">Accept</button>
+						<button class="button youfind-modal-accept">Accept</button>
 					</div>
 				</div>
 			</div>
-			
+			<div class="youfind-modal" id="settingsModal">
+				<div class="youfind-modal-content">
+					<header class="youfind-modal-header">
+						<h3 class="youfind-modal-title"> Settings </h3>
+						<button class="button youfind-modal-cancel">X</button>
+					</header>
+					<div>
+						<input type="radio" name="order" value="relevance" checked="checked"> Relevance
+						<input type="radio" name="order" value="rating"> Rating
+						<input type="radio" name="order" value="date"> Date
+						<input type="radio" name="order" value="title"> Title
+						<input type="radio" name="order" value="viewCount"> Views
+					</div>
+				</div>
+			</div>
 			<div class="youfind-overlay"></div>
 		</div>
 	</div>
+	<script>
+		$('#searchTextField').fancyInput();
+	</script>
+	<!-- Google Api Handler -->
+	<script src="/javascripts/googleApi.js"></script>
+	<!-- JavaScript Google Client Library -->
 	<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
 	<script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"></script>
-	<script src="/vendor/jquery/jquery.min.js"></script>
-	<script src="/vendor/fancyInput/fancyInput.js"></script>
+	<!-- SWFObject -->
+	<script src="/vendor/swfobject/swfobject/src/swfobject.js"></script>
+	<!-- Own JS Files -->
 	<script src="/javascripts/modal.js"></script>
 	<script src="/javascripts/main.js"></script>
 </body>

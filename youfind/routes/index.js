@@ -6,7 +6,6 @@ router.get('/', function(req, res) {
 	var url = require('url');
  	var url_parts = url.parse(req.url, true);
 	var query = url_parts.query;
-	console.log(query.imageUrl);
 	res.render('index', { title: 'Express',  imageUrl:query.imageUrl });
 });
 

@@ -1,15 +1,8 @@
 var GOOGLE_API_KEY = "AIzaSyDjR_Icuc789VOUUdapZJ5fHroLQ7bU8zA"
 
 googleApiClientReady = function() {
-	function loadYoutubeDataApi(){
-		gapi.client.load('youtube', 'v3', function() {
-			console.log("Load Youtube API successfully")
-  		});
-	}
-	console.log('API Client Ready');
 	gapi.client.setApiKey(GOOGLE_API_KEY);
-	loadYoutubeDataApi();
-	// triggerAuth();
+	triggerAuth();
 }
 
 
@@ -71,7 +64,7 @@ function handleAuthResult(authResult) {
 function loadAPIClientInterfaces() {
   gapi.client.load('youtube', 'v3', function() {
   	//handler
-  	console.log("pass gapi auth");
+    console.log("Load Youtube API successfully")
   });
 }
 
