@@ -80,6 +80,8 @@ App.main = (function(){
 		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;
 		var termScoresList = [];
 		var termsList = [];	
+		var videos = []
+
 		
 		$.ajax({
 			url: '/search',
@@ -88,7 +90,6 @@ App.main = (function(){
 				searchURL: googleImageSearchURL
 			},
 			beforeSend: function() {
-				$(".video-modal").remove();
 				$('.grid ul').empty();
 				$('.grid').html('<i class="fa fa-circle-o-notch fa-spin"></i>');
 			},
@@ -115,16 +116,22 @@ App.main = (function(){
 				}
 			}
 			console.log("Query String: " + str);
+
+			var order = 'relevance';
+			var selectedOrder = $("input[type='radio'][name='order']:checked");
+			if(selectedOrder.length > 0){
+				order = selectedOrder.val();
+			}
+			console.log(order);
 			var request = gapi.client.youtube.search.list({
 				part: 'snippet',
 				q: str.trim(),
 				maxResults: 10,
-				order: 'relevance',
-				type: 'video',
+				order: order,
+				type: 'video'
 			});
 			request.execute(function(response) {
 				var result = response.result;
-				videos = []
 				var counter = 0;
 				for(index in result.items){
 					var item = result.items[index];
@@ -136,15 +143,15 @@ App.main = (function(){
 					video.channelTitle = item.snippet.channelTitle;
 					video.thumbnail = item.snippet.thumbnails.medium.url;
 
-					searchStatistics(video, videos, result.items.length);
+					searchStatistics(video, result.items.length);
 				}
 			});
 		}
 
-		function searchStatistics(video, videos, count){
+		function searchStatistics(video, count){
 
 			var videoRequest = gapi.client.youtube.videos.list({
-				part: 'statistics',
+				part: 'statistics, topicDetails, recordingDetails',
 				id: video.id,
 			});
 
@@ -152,18 +159,31 @@ App.main = (function(){
 			videoRequest.execute(function(videoResponse){
 				var videoResult = videoResponse.result;
 				video.viewCount = videoResult.items[0].statistics.viewCount;
+
+				if(videoResult.items[0].recordingDetails) {
+					video.location = videoResult.items[0].recordingDetails.location;
+					console.log("video "+videos.length+"has location");
+					console.log(video.location);
+				}
 				videos.push(video);
-				console.log(videoResult);
-				console.log(counter+" "+video.id);
 				//only display results when this is the last video
 				if(counter >= count - 1){
-					displayResults(videos);
+					displayResults();
 				}
 				counter++;
-			})
+			});
 		}
 
-		function displayResults(videos){
+		function printText(obj){
+			if(typeof obj == 'object')
+				for(var key in obj){
+		    		if(key == "text")
+		    			console.log(obj[key]);
+		    		printText(obj[key]);
+		    	}
+		}
+
+		function displayResults(){
 			$('.grid').html('<ul></ul>');
 			for(index in videos){
 				video = videos[index];
@@ -171,7 +191,7 @@ App.main = (function(){
 				html +=	"<figure>"
 				html +=		'<div class="youfind-result-thumbnail">'
 				html += 		'<div class="youfind-overlay">'
-				html += 			'<button type="button" value="' +  video.id + '" class="play-button youfind-modal-trigger" data-modal="videoModal-' + index + '">'
+				html += 			'<button type="button" value="' +  video.id + '" class="button play-button youfind-modal-trigger" data-modal="videoModal">'
 				html +=					'<i class="fa fa-play-circle"></i>'
 				html +=     		'</button>'
 				html += 		'</div>'
@@ -182,28 +202,36 @@ App.main = (function(){
 				html += 		'<p class="youfind-result-channel">' + video.channelTitle + '</p>'
 				html += 		'<p class="youfind-result-date">' + video.publishedAt.substr(0, video.publishedAt.indexOf("T")) + '</p>'
 				html +=			'<p class="youfind-result-views">' + video.viewCount + ' views</p>'
+				html +=			'<div class="g-ytsubscribe"></div>'
 				html += 	'</figcaption>'
 			 	html += '</figure>'
 				html += '</li>'
 			 	$('.grid ul').append(html);
-
-			 	html = '<div class="youfind-modal video-modal" id="videoModal-' + index+ '">'
-				html += 	'<div class="youfind-modal-content">'
-				html += 		'<div>'
-				html += 			'<iframe id="resultPlayer" frameBorder="0" '
-				html += 					'src="http://www.youtube.com/embed/' + video.id + '">'
-				html += 			'</iframe>'
-				html += 		'</div>'
-				html += 	'</div>'
-				html += '</div>'
-				$(html).insertAfter('#imageModal');
 			}
 			bindPlayButtons();
+			addSubscrButtons();
 		}
 
 		function bindPlayButtons(){
 			$('.play-button').each(function(){
+				$(this).on('click', function(e){
+					console.log("TEST");
+					var player = document.getElementById('resultPlayer');
+					if(player){
+						player.loadVideoById($(this).attr('value'));
+					}
+				})
 				App.modal.linkModal(this);
+			})
+		}
+
+		function addSubscrButtons(){
+			$.getScript("https://apis.google.com/js/platform.js");
+			$(".g-ytsubscribe").each(function(index, element){
+				var channelTitle = $(this).siblings(".youfind-result-channel").text();
+				if(channelTitle != ""){
+					$(this).attr("data-channel", channelTitle);
+				}
 			})
 		}
 
@@ -245,6 +273,27 @@ App.main = (function(){
 			var end = new Date();
 			console.log("Timing for Dom analysis:\t"+(end-start)+" ms");
 		}
+
+		/*get video topics using topic IDs and change term score with video title, description and related topics*/
+		function relevanceFeedback(index){
+			var video = $(".grid ul").eq(index);
+			var videoTitle = $(video).find(".title");
+			var videoDescription = $(video).find("description");
+
+			var tokenizedTitle = tokenizeText(videoTitle);
+			var tokenizedDescription = tokenizeText(videoDescription);
+
+			appendToTermScoreList(tokenizedTitle, 3);
+			appendToTermScoreList(tokenizedDescription, 1);
+
+			termScoresList.sort(compare);
+			var result = "";
+			termScoresList.forEach(function(termScore){
+				result += termScore.term+" "+termScore.score+"\t";
+			})
+		}
+
+
 
 		function appendToTermScoreList(array, score, isSortNeeded){
 
@@ -298,8 +347,11 @@ App.main = (function(){
 	}
 
 	return {
-		initializeFancyInput: function(){
-			$('#searchTextField').fancyInput();
+		initializeYoutubePlayer: function(){
+			var params = { allowScriptAccess: "always", allowFullScreen: "true"};
+    	var atts = { id: "resultPlayer"};
+    	swfobject.embedSWF("http://www.youtube.com/v/M7lc1UVf-VE?enablejsapi=1&playerapiid=ytplayer&version=3","youtube-api-player", "640", "360", "8", null, null, params, atts);
+    	console.log("Load Youtube Player Successfully");
 		},
 		bindEnterKey: function() {
 			$("#searchTextField").on('keypress', function(e){
@@ -333,14 +385,32 @@ App.main = (function(){
 				switchToSecondView($('#searchTextField'));
 				search();
 			});
+		},
+		detectUrlQuery: function(){
+			var imageUrlQuery = $("#imageUrl").text();
+			//Detect whether the http request is sent with image url query (in most case, via chrome extension)
+			if(imageUrlQuery!= "undefined"){
+				imageExists(imageUrlQuery, function(isValid){
+					if(isValid){
+						currentImageURL = imageUrlQuery;
+						App.modal.removeAllModals();
+						switchToSecondView(imageUrlQuery);
+						search();
+					} else {
+						// TODO: add notifications to user
+						console.log('Invalid URL');
+					}
+				});
+			};
 		}
 	}
 })();
 
 $(document).ready(function(){
-	App.main.initializeFancyInput();
+	App.main.initializeYoutubePlayer();
 	App.main.bindEnterKey();
 	App.main.bindUploadButton();
 	App.main.bindAcceptButton();
 	App.main.bindSearchButton();
+	App.main.detectUrlQuery();
 });

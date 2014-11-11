@@ -8,6 +8,10 @@ App.modal = (function(){
 
 	function removeAllModals() {
 		$('.youfind-modal').removeClass('youfind-show');
+		var player = document.getElementById('resultPlayer');
+		if(player){
+			player.stopVideo();
+		}
 	}
 
 	return {
@@ -31,4 +35,5 @@ App.modal = (function(){
 $(document).ready(function(){
 	App.modal.linkOverlay();
 	App.modal.linkModal($('#imageButton'));
+	App.modal.linkModal($('#settingsButton'));
 });
