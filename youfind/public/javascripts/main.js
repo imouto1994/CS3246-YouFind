@@ -142,12 +142,6 @@ App.main = (function(){
 					video.description = item.snippet.description;
 					video.channelTitle = item.snippet.channelTitle;
 					video.thumbnail = item.snippet.thumbnails.medium.url;
-					// console.log("etag "+item.etag);
-					// console.log("tags "+item.tags);
-					// console.log("tag suggestions availability "+item.tagSuggestionsAvailability);
-					// console.log("tag suggestions "+item.tagSuggestions);
-					// console.log("topic IDs "+item.topicDetails.topicIds);
-					// console.log("relevant topic IDs "+item.topicDetails.relevantTopicIds);
 
 					searchStatistics(video, result.items.length);
 				}
@@ -165,19 +159,28 @@ App.main = (function(){
 			videoRequest.execute(function(videoResponse){
 				var videoResult = videoResponse.result;
 				video.viewCount = videoResult.items[0].statistics.viewCount;
-				video.topics = videoResult.items[0].topicDetails.topicIds;
-				video.relevantTopicIds = videoResult.items[0].topicDetails.relevantTopicIds;
-				if(videoResult.items[0].recordingDetails)
+
+				if(videoResult.items[0].recordingDetails) {
 					video.location = videoResult.items[0].recordingDetails.location;
+					console.log("video "+videos.length+"has location");
+					console.log(video.location);
+				}
 				videos.push(video);
-				console.log(videoResult);
-				console.log(counter+" "+video.id);
 				//only display results when this is the last video
 				if(counter >= count - 1){
 					displayResults();
 				}
 				counter++;
-			})
+			});
+		}
+
+		function printText(obj){
+			if(typeof obj == 'object')
+				for(var key in obj){
+		    		if(key == "text")
+		    			console.log(obj[key]);
+		    		printText(obj[key]);
+		    	}
 		}
 
 		function displayResults(){
@@ -273,58 +276,21 @@ App.main = (function(){
 
 		/*get video topics using topic IDs and change term score with video title, description and related topics*/
 		function relevanceFeedback(index){
-			var topics = [];
-			var relevantTopics = [];
+			var video = $(".grid ul").eq(index);
+			var videoTitle = $(video).find(".title");
+			var videoDescription = $(video).find("description");
 
-			getVideoTopics();
+			var tokenizedTitle = tokenizeText(videoTitle);
+			var tokenizedDescription = tokenizeText(videoDescription);
 
-			function getVideoTopics(){
-				var topicIds = videos[index].topicIds;
-				var relevantTopicIds = videos[index].relevantTopicIds;
-				var topicNum = topicIds.length + relevantTopicIds.length;
-				var counter = 0;
+			appendToTermScoreList(tokenizedTitle, 3);
+			appendToTermScoreList(tokenizedDescription, 1);
 
-				topicIds.forEach(function(topicId){
-				    var service_url = 'https://www.googleapis.com/freebase/v1/topic';
-				    var params = {};
-				    $.getJSON(service_url + topic_id + '?callback=?', params, function(topic) {
-				    	topics.push(topic);
-				    	counter++;
-				    	if(counter == topicNum)
-				    		changeTermScore();
-				    });
-				});
-				relevantTopicIds.forEach(function(topicId){
-				    var service_url = 'https://www.googleapis.com/freebase/v1/topic';
-				    var params = {};
-				    $.getJSON(service_url + topic_id + '?callback=?', params, function(topic) {
-				    	relevantTopics.push(topic);
-				    	counter++;
-				    	if(counter == topicNum)
-				    		changeTermScore();
-				    });
-				});
-			}
-
-			function changeTermScore(){
-				var video = $(".grid ul").eq(index);
-				var videoTitle = $(video).find(".title");
-				var videoDescription = $(video).find("description");
-
-				var tokenizedTitle = tokenizeText(videoTitle);
-				var tokenizedDescription = tokenizeText(videoDescription);
-
-				appendToTermScoreList(tokenizedTitle, 3);
-				appendToTermScoreList(tokenizedDescription, 1);
-				appendToTermScoreList(topics, 3);
-				appendToTermScoreList(relevantTopics, 2);
-
-				termScoresList.sort(compare);
-				var result = "";
-				termScoresList.forEach(function(termScore){
-					result += termScore.term+" "+termScore.score+"\t";
-				})
-			}
+			termScoresList.sort(compare);
+			var result = "";
+			termScoresList.forEach(function(termScore){
+				result += termScore.term+" "+termScore.score+"\t";
+			})
 		}
 
 
