@@ -269,7 +269,7 @@ App.main = (function(){
 			appendToTermScoreList(tokenizedTitle, 3);
 			appendToTermScoreList(tokenizedDescription, 1);
 			termScoresList.sort(compare);
-		var result = "";
+			var result = "";
 			termScoresList.forEach(function(termScore){
 				result += termScore.term+" "+termScore.score+"\t";
 			})

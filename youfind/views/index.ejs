@@ -13,11 +13,15 @@
 	<link rel="stylesheet" type="text/css" href="/vendor/fontawesome/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="/vendor/fancyInput/fancyInput.css">
 	<link rel="stylesheet" type="text/css" href="/stylesheets/main.css" />
-
 	<!-- JQuery -->
 	<script src="/vendor/jquery/jquery.min.js"></script>
 	<!-- Fancy Input -->
 	<script src="/vendor/fancyInput/fancyInput.js"></script>
+	<!-- Google Api Handler -->
+	<script src="/javascripts/googleApi.js"></script>
+	<!-- JavaScript Google Client Library -->
+	<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
+	<script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"></script>
 </head>
 <body>
 	<div class="container">
@@ -25,7 +29,7 @@
 						data-modal="settingsModal" id="settingsButton">
 			<i class="fa fa-gear"></i>
 		</button>
-		<button type="button" class="button round-button login-button">
+		<button type="button" id="profileButton" class="button round-button login-button">
 			<i class="fa fa-google-plus"></i>
 		</button>
 		<nav class="youfind-header" id="youfind-nav-bar">
@@ -103,11 +107,6 @@
 	<script>
 		$('#searchTextField').fancyInput();
 	</script>
-	<!-- Google Api Handler -->
-	<script src="/javascripts/googleApi.js"></script>
-	<!-- JavaScript Google Client Library -->
-	<script type="text/javascript" src="https://apis.google.com/js/platform.js"></script>
-	<script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"></script>
 	<!-- SWFObject -->
 	<script src="/vendor/swfobject/swfobject/src/swfobject.js"></script>
 	<!-- Own JS Files -->
