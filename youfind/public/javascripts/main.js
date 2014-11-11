@@ -80,6 +80,8 @@ App.main = (function(){
 		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;
 		var termScoresList = [];
 		var termsList = [];	
+		var videos = []
+
 		
 		$.ajax({
 			url: '/search',
@@ -126,11 +128,10 @@ App.main = (function(){
 				q: str.trim(),
 				maxResults: 10,
 				order: order,
-				type: 'video',
+				type: 'video'
 			});
 			request.execute(function(response) {
 				var result = response.result;
-				videos = []
 				var counter = 0;
 				for(index in result.items){
 					var item = result.items[index];
@@ -142,15 +143,15 @@ App.main = (function(){
 					video.channelTitle = item.snippet.channelTitle;
 					video.thumbnail = item.snippet.thumbnails.medium.url;
 
-					searchStatistics(video, videos, result.items.length);
+					searchStatistics(video, result.items.length);
 				}
 			});
 		}
 
-		function searchStatistics(video, videos, count){
+		function searchStatistics(video, count){
 
 			var videoRequest = gapi.client.youtube.videos.list({
-				part: 'statistics',
+				part: 'statistics, topicDetails, recordingDetails',
 				id: video.id,
 			});
 
@@ -158,18 +159,31 @@ App.main = (function(){
 			videoRequest.execute(function(videoResponse){
 				var videoResult = videoResponse.result;
 				video.viewCount = videoResult.items[0].statistics.viewCount;
+
+				if(videoResult.items[0].recordingDetails) {
+					video.location = videoResult.items[0].recordingDetails.location;
+					console.log("video "+videos.length+"has location");
+					console.log(video.location);
+				}
 				videos.push(video);
-				console.log(videoResult);
-				console.log(counter+" "+video.id);
 				//only display results when this is the last video
 				if(counter >= count - 1){
-					displayResults(videos);
+					displayResults();
 				}
 				counter++;
-			})
+			});
 		}
 
-		function displayResults(videos){
+		function printText(obj){
+			if(typeof obj == 'object')
+				for(var key in obj){
+		    		if(key == "text")
+		    			console.log(obj[key]);
+		    		printText(obj[key]);
+		    	}
+		}
+
+		function displayResults(){
 			$('.grid').html('<ul></ul>');
 			for(index in videos){
 				video = videos[index];
@@ -260,20 +274,26 @@ App.main = (function(){
 			console.log("Timing for Dom analysis:\t"+(end-start)+" ms");
 		}
 
+		/*get video topics using topic IDs and change term score with video title, description and related topics*/
 		function relevanceFeedback(index){
 			var video = $(".grid ul").eq(index);
 			var videoTitle = $(video).find(".title");
 			var videoDescription = $(video).find("description");
+
 			var tokenizedTitle = tokenizeText(videoTitle);
 			var tokenizedDescription = tokenizeText(videoDescription);
+
 			appendToTermScoreList(tokenizedTitle, 3);
 			appendToTermScoreList(tokenizedDescription, 1);
+
 			termScoresList.sort(compare);
 			var result = "";
 			termScoresList.forEach(function(termScore){
 				result += termScore.term+" "+termScore.score+"\t";
 			})
 		}
+
+
 
 		function appendToTermScoreList(array, score, isSortNeeded){
 
