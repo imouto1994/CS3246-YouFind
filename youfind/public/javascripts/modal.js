@@ -20,9 +20,12 @@ App.modal = (function(){
 			var overlay = $('.youfind-overlay');
 			$(overlay).on('click', removeAllModals);
 		},
-		linkModal: function(triggerButton){
+		linkModal: function(triggerButton, preProcessFunc){
 			if(!$(triggerButton).hasClass('youfind-modal-trigger')){
 				return;
+			}
+			if(typeof preProcessFunc != 'undefined'){
+				preProcessFunc();
 			}
 			var modalWindow = $('#' + $(triggerButton).attr('data-modal'));
 			var closeButtons = $(modalWindow).find('.youfind-modal-cancel');
@@ -34,6 +37,12 @@ App.modal = (function(){
 
 $(document).ready(function(){
 	App.modal.linkOverlay();
-	App.modal.linkModal($('#imageButton'));
+	App.modal.linkModal($('#imageButton'), function(){
+		var buttonIcon = $('#imageFileChooser').prev('i');
+		var acceptIcon = $('.youfind-accept-button').children('i');
+		$(buttonIcon).attr('class', 'fa fa-upload');
+		$(acceptIcon).attr('class', '');
+
+	});
 	App.modal.linkModal($('#settingsButton'));
 });
