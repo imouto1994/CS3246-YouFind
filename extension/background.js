@@ -21,6 +21,18 @@ chrome.runtime.onMessage.addListener(
 	}
 )
 
+function redirect(info){
+	var imageUrl = inderUrl + "?imageUrl=" + info.srcUrl;
+	chrome.tabs.create({url: imageUrl});
+}
+
+
+function editContextMenu(){
+	chrome.contextMenus.create({title: "YouFind", contexts:["image"], onclick: redirect});
+}
+
+
 // Set up a click handler so that we can merge all the windows.
 chrome.browserAction.onClicked.addListener(triggerScript);
-
+//add title to menu item
+editContextMenu();

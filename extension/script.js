@@ -1,6 +1,5 @@
 //@author: Yichao, wangycbeyond@gmail.com. All rights reserved.
 
-
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if (request.text == "triggerImagePin") {
