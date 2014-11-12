@@ -87,6 +87,45 @@ input {
 }
 
   /*******************************************************/	
+ /*											RADIO BUTTON 										*/
+/*******************************************************/
+input[type="radio"] {
+	width: 20px;
+	margin: 0.5em 1em;
+	padding: 2px;
+	display: inline-block;
+	-webkit-appearance: none;
+	height: 20px;
+	border-radius: 50%;
+	border: solid white 2px;
+	background: transparent;
+	vertical-align: middle;
+	-webkit-transition: all .25s;
+	   -moz-transition: all .25s;
+	    -ms-transition: all .25s;
+	     -o-transition: all .25s;
+	        transition: all .25s;
+}	
+
+input[type="radio"]:hover {
+	-webkit-transform: scale(1.5);
+	   -moz-transform: scale(1.5);
+	    -ms-transform: scale(1.5);
+	     -o-transform: scale(1.5);
+	        transform: scale(1.5);
+}
+
+input[type="radio"]:checked {
+	background: #fff;
+}
+
+label {
+	width: 85%;
+	margin-left: 1em;
+	display: inline-block;
+}
+
+  /*******************************************************/	
  /*											BUTTONS 											  */
 /*******************************************************/	
 

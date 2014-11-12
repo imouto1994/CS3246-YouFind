@@ -82,7 +82,7 @@
 							<input 	type='file' id="imageFileChooser" 
 											accept="image/gif, image/jpeg, image/jpg, image/png" />
 						</button>
-						<button class="button youfind-modal-accept">Accept</button>
+						<button class="button youfind-modal-accept"><i></i>Accept</button>
 					</div>
 				</div>
 			</div>
@@ -93,11 +93,29 @@
 						<button class="button youfind-modal-cancel">X</button>
 					</header>
 					<div>
-						<input type="radio" name="order" value="relevance" checked="checked"> Relevance
-						<input type="radio" name="order" value="rating"> Rating
-						<input type="radio" name="order" value="date"> Date
-						<input type="radio" name="order" value="title"> Title
-						<input type="radio" name="order" value="viewCount"> Views
+						<p><u>Ranking Order:</u></p>
+						<input 	type="radio" name="order" id ="relevance" 
+										value="relevance" checked="checked" /> 
+						<label for="relevance">Relevance</label>
+						<input 	type="radio" name="order" 
+										id="rating"value="rating" /> 
+						<label for="rating">Rating</label>
+						<input 	type="radio" name="order" 
+										id="date" value="date" />
+						<label for="date">Date</label>
+						<input 	type="radio" name="order" 
+										id="title" value="title" /> 
+						<label for="title">Title</label>
+						<input 	type="radio" name="order" 
+										id="viewCount" value="viewCount" /> 
+						<label for="viewCount">Views</label>
+						<p><u>Ranking Order:</u></p>
+						<input 	type="radio" name="feedback" id ="auto" 
+										value="auto" checked="checked" /> 
+						<label for="auto">Auto-search after every feedback</label>
+						<input 	type="radio" name="feedback" 
+										id="manual" value="manual" /> 
+						<label for="manual">Manual-search after feedbacks</label>
 					</div>
 				</div>
 			</div>

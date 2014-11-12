@@ -16,33 +16,41 @@ App.main = (function(){
 	/* Read uploaded image */
 	function readImage(input) {
 		if ( input.files && input.files[0] ) {
-	        var FR= new FileReader();
-	        FR.onload = function(e) {
-	        	var uploadedImageData = e.target.result.replace(/^data:image\/(png|jpg|jpeg|gif);base64,/, "");
-	        	$.ajax({
-	        		url: 'https://api.imgur.com/3/image',
-	        		type: 'POST',
-	        		headers: {
-	        			Authorization: 'Client-ID 33f456285414f75',
-	        			Accept: 'application/json'
-	        		},
-	        		data: {
-	        			image: uploadedImageData,
-	        			type: 'base64'
-	        		},
-	        		dataType: 'JSON',
-	        		success: function(json){
-	        			currentImageURL = json.data.link;
-	        			App.modal.removeAllModals();
-	        		},
-	        		error: function(json){
-	        			// TODO: add notifications to user
-	        			console.log("Cannot upload image");
-	        		}
-	        	})
-	        };       
-	        FR.readAsDataURL( input.files[0] );
-    	}
+			var buttonIcon = $('#imageFileChooser').prev('i');
+      var FR= new FileReader();
+      FR.onload = function(e) {
+      	var uploadedImageData = e.target.result.replace(/^data:image\/(png|jpg|jpeg|gif);base64,/, "");
+      	$.ajax({
+      		url: 'https://api.imgur.com/3/image',
+      		type: 'POST',
+      		headers: {
+      			Authorization: 'Client-ID 33f456285414f75',
+      			Accept: 'application/json'
+      		},
+      		data: {
+      			image: uploadedImageData,
+      			type: 'base64'
+      		},
+      		dataType: 'JSON',
+      		beforeSend: function(){
+      			$(buttonIcon).removeClass('fa-upload');
+      			$(buttonIcon).addClass('fa-circle-o-notch fa-spin');
+      		},
+      		success: function(json){
+      			$(buttonIcon).removeClass('fa-circle-o-notch fa-spin');
+      			$(buttonIcon).addClass('fa-check-circle');
+      			currentImageURL = json.data.link;
+      			App.modal.removeAllModals();
+      		},
+      		error: function(json){
+      			$(buttonIcon).removeClass('fa-circle-o-notch fa-spin');
+      			$(buttonIcon).addClass('fa-warning');
+      			console.log("Cannot upload image");
+      		}
+      	})
+      };       
+      FR.readAsDataURL( input.files[0] );
+		}
 	}
 
 	/* Switch from initial view to second view */
@@ -368,13 +376,18 @@ App.main = (function(){
 		},
 		bindAcceptButton: function(){
 			$('.youfind-modal-accept').on('click', function(e){
+				var acceptButton = this;
+				var acceptIcon = $(acceptButton).children('i')[0]
+				$(acceptIcon).attr("class", "fa fa-circle-o-notch fa-spin");
 				imageExists($('#imageURLTextField').val(), function(isValid){
 					if(isValid){
+						$(acceptIcon).removeClass('fa-circle-o-notch fa-spin');
+      			$(acceptIcon).addClass('fa-check-circle');
 						currentImageURL = $('#imageURLTextField').val();
 						App.modal.removeAllModals();
 					} else {
-						// TODO: add notifications to user
-						console.log('Invalid URL');
+						$(acceptIcon).removeClass('fa-circle-o-notch fa-spin');
+      			$(acceptIcon).addClass('fa-warning');
 					}
 				})
 			});
