@@ -193,6 +193,16 @@ label {
 	width: 100%;
 	position: relative;
 	overflow: hidden;
+	-webkit-transition: all .25s;
+	   -moz-transition: all .25s;
+	    -ms-transition: all .25s;
+	     -o-transition: all .25s;
+	        transition: all .25s;
+}
+
+.upload-button:hover {
+	background: #fff;
+	color: #e74c3c;
 }
 
 /* Modal Cancel Button */
@@ -212,10 +222,16 @@ label {
 	display: block;
 	font-size: 1.0em;
 	padding: 0.5em 1.5em;
+	-webkit-transition: all .25s;
+	   -moz-transition: all .25s;
+	    -ms-transition: all .25s;
+	     -o-transition: all .25s;
+	        transition: all .25s;
 }
 
-.youfind-modal-accept i[class="fa fa-check-circle"] {
-	margin-right: 0.5em;
+.youfind-modal-accept:hover {
+	background: #fff;
+	color: #e74c3c;
 }
 
 /* Login Button */
@@ -593,13 +609,35 @@ input#imageFileChooser {
 	opacity: 1.0;
 }
 
-
 .grid .play-button {
 	position: relative;
 	margin: 0 auto;
 	background: transparent;
 	font-size: 6em;
 	top: 25%;
+}
+
+.grid .feedback-button {
+	position: absolute;
+	top: 0;
+	right: 0.25em;
+	padding: 0;
+	background: transparent;
+	font-size: 1.5em;
+	-webkit-transition: all .35s;
+	   -moz-transition: all .35s;
+	    -ms-transition: all .35s;
+	     -o-transition: all .35s;
+	        transition: all .35s;
+}
+
+.grid .feedback-button:hover {
+	color: #e74c3c;
+	-webkit-transform: scale(1.25);
+	   -moz-transform: scale(1.25);
+	    -ms-transform: scale(1.25);
+	     -o-transform: scale(1.25);
+	        transform: scale(1.25);
 }
 
 .grid figure img {
@@ -625,8 +663,12 @@ input#imageFileChooser {
 	content: 'by ' 
 }
 
-.grid .youfind-result-channel {
-		
+.grid .youfind-result-channelID {
+	visibility: hidden;
+	opacity: 0;
+	padding: 0;
+	height: 0;
+	margin: 0;
 }
 
 .grid .youfind-result-date {

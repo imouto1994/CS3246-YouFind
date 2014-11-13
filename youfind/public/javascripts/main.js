@@ -1,8 +1,10 @@
 var App = App || {};
 
 App.main = (function(){
-	var hasSwitchedToSecondView = false
+	var hasSwitchedToSecondView = false;
+	var oldImageURL = null;
  	var currentImageURL = null;
+ 	var counter = 0;
 	var english = /^[A-Za-z0-9]*$/;
 	var termScoresList = [];
 	var termsList = [];
@@ -92,26 +94,32 @@ App.main = (function(){
 		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;			
 		var videos = []
 
-		$.ajax({
-			url: '/search',
-			type: 'GET',
-			data: {
-				searchURL: googleImageSearchURL
-			},
-			beforeSend: function() {
-				$('.grid ul').empty();
-				$('.grid').html('<i class="fa fa-circle-o-notch fa-spin"></i>');
-			},
-			success: function(data) {
-				extractTerms(data);
-				searchVideos();
-			},
-			error: function(data) {
-				console.log(data);
-			}
-		});
+		if(oldImageURL != currentImageURL){
+			$.ajax({
+				url: '/search',
+				type: 'GET',
+				data: {
+					searchURL: googleImageSearchURL
+				},
+				beforeSend: function() {
+					$('.grid ul').empty();
+					$('.grid').html('<i class="fa fa-circle-o-notch fa-spin"></i>');
+				},
+				success: function(data) {
+					extractTerms(data);
+					searchVideos();
+				},
+				error: function(data) {
+					console.log(data);
+				}
+			});
+		} else {
+			$('.search-button').attr('class', 'fa fa fa-circle-o-notch fa-spin');
+			$('.search-button').prop('disabled', true);
+			searchVideos();
+		}
 
-		function searchVideos(terms) {
+		function searchVideos() {
 			var str = ""
 			for(var i = 0; i < termScoresList.length && i < 3; i++){
 					str += termScoresList[i].term + " ";
@@ -138,7 +146,7 @@ App.main = (function(){
 			});
 			request.execute(function(response) {
 				var result = response.result;
-				var counter = 0;
+				counter = 0;
 				if (result.items.length == 0) {
 					displayNoResults();
 				} else {
@@ -149,22 +157,39 @@ App.main = (function(){
 						video.title = item.snippet.title;
 						video.publishedAt = item.snippet.publishedAt;
 						video.description = item.snippet.description;
+						video.channelId = item.snippet.channelId;
 						video.channelTitle = item.snippet.channelTitle;
 						video.thumbnail = item.snippet.thumbnails.medium.url;
-
-						searchStatistics(video, result.items.length);
+						fillUpName(video, result.items.length);
 					}
 				}
 			});
+		}
+
+		function fillUpName(video, count) {
+			if(video.channelTitle.trim().length){
+				searchStatistics(video, count)
+			} else {
+				var channelRequest = gapi.client.youtube.channels.list({
+					part: 'snippet',
+					id: video.channelId,
+					maxResults: 1
+				});
+				channelRequest.execute(function(channelResponse){
+					var channelTitle = channelResponse.result.items[0].snippet.title;
+					video.channelTitle = channelTitle;
+					searchStatistics(video, count);
+				});
+			}
 		}
 
 		function searchStatistics(video, count){
 			var videoRequest = gapi.client.youtube.videos.list({
 				part: 'statistics, topicDetails, recordingDetails',
 				id: video.id,
+				maxResults: 1
 			});
 
-			counter = 0;
 			videoRequest.execute(function(videoResponse){
 				var videoResult = videoResponse.result;
 				video.viewCount = videoResult.items[0].statistics.viewCount;
@@ -194,6 +219,10 @@ App.main = (function(){
 		}
 
 		function displayResults(){
+			if($('.search-button').prop('disabled')){
+				$('.search-button').attr('class', 'fa fa-search');
+				$('.search-button').prop('disabled', false);
+			}
 			$('.grid').html('<ul></ul>');
 			for(index in videos){
 				video = videos[index];
@@ -203,13 +232,17 @@ App.main = (function(){
 				html += 		'<div class="youfind-overlay">'
 				html += 			'<button type="button" value="' +  video.id + '" class="button play-button youfind-modal-trigger" data-modal="videoModal">'
 				html +=					'<i class="fa fa-play-circle"></i>'
-				html +=     		'</button>'
+				html +=     	'</button>'
+				html +=       '<button type="button" value="' + video.id +  '" class="button feedback-button">'
+				html += 				'<i class="fa fa-smile-o"></i>'
+				html +=  			'</button>'
 				html += 		'</div>'
 				html += 		'<img src="' + video.thumbnail + '">'
 				html +=		'</div>'
 				html +=		'<figcaption>'
 				html +=			'<h3 class="youfind-result-title">' + video.title + '</h3>'
 				html += 		'<p class="youfind-result-channel">' + video.channelTitle + '</p>'
+				html += 		'<p class="youfind-result-channelID">' + video.channelId + '</p>'
 				html += 		'<p class="youfind-result-date">' + video.publishedAt.substr(0, video.publishedAt.indexOf("T")) + '</p>'
 				html +=			'<p class="youfind-result-views">' + video.viewCount + ' views</p>'
 				html += 		'<p class="youfind-result-description">' + video.description + '</p>'
@@ -220,16 +253,18 @@ App.main = (function(){
 			 	$('.grid ul').append(html);
 			}
 			bindPlayButtons();
+			bindRelevanceFeedbackButtons();
 			addSubscrButtons();
 		}
 
 		function displayNoResults() {
-			$('.grid').html('<h1>No results found.</h1>');
+			$('.grid').html('<h1>No results found. :(</h1>');
 		}
 
-		function bindPlayButtons(){
+		function bindPlayButtons() {
 			$('.play-button').each(function(){
 				$(this).on('click', function(e){
+					e.preventDefault();
 					var player = document.getElementById('resultPlayer');
 					if(typeof player != 'undefined'){
 						player.loadVideoById($(this).attr('value'));
@@ -240,17 +275,29 @@ App.main = (function(){
 			})
 		}
 
+		function bindRelevanceFeedbackButtons() {
+			$('.feedback-button').each(function(){
+				$(this).on('click', function(e){
+					e.preventDefault();
+					relevanceFeedback($(this).parents("li")[0], 2);
+				})
+			})
+		}	
+
 		function addSubscrButtons(){
 			$.getScript("https://apis.google.com/js/platform.js");
 			$(".g-ytsubscribe").each(function(index, element){
-				var channelTitle = $(this).siblings(".youfind-result-channel").text();
-				if(channelTitle != ""){
-					$(this).attr("data-channel", channelTitle);
+				var channelId = $(this).siblings(".youfind-result-channelID").text();
+				if(channelId != ""){
+					$(this).attr("data-channelid", channelId);
 				}
 			})
 		}
 
 		function extractTerms(data) {
+			termScoresList = []
+			termsList = []
+			oldImageURL = currentImageURL;
 			var start = new Date();				
 			var bestGuess = $(data).find(".qb-b").text();
 			var searchResult = $(data).find(".srg");
@@ -284,7 +331,8 @@ App.main = (function(){
 		}
 
 		/*get video topics using topic IDs and change term score with video title, description and related topics*/
-		function relevanceFeedback(videoHtml){
+		function relevanceFeedback(videoHtml, factor){
+			factor = factor || 1;
 			console.log("relevanceFeedback");
 			console.log(videoHtml);
 			var videoTitle = $(videoHtml).find(".youfind-result-title").text();
@@ -294,11 +342,12 @@ App.main = (function(){
 			var tokenizedTitle = tokenizeText(videoTitle);
 			var tokenizedDescription = tokenizeText(videoDescription);
 
-			appendToTermScoreList(tokenizedTitle, 3);
-			appendToTermScoreList(tokenizedDescription, 1);
+			appendToTermScoreList(tokenizedTitle, 3 * factor);
+			appendToTermScoreList(tokenizedDescription, 1 * factor);
 
 			termScoresList.sort(compare);
 			var result = "";
+			console.log("Terms Score After Feedback: ");
 			termScoresList.forEach(function(termScore){
 				result += termScore.term+" "+termScore.score+"\t";
 			})
@@ -404,8 +453,14 @@ App.main = (function(){
 		bindSearchButton: function(){
 			$('.search-button').on('click', function(e) {
 				e.preventDefault();
-				switchToSecondView($('#searchTextField'));
-				search();
+				if(isValidForSearch()){
+					switchToSecondView($('#searchTextField'));
+					search();
+				}
+
+				function isValidForSearch() {
+					return currentImageURL != null;
+				}
 			});
 		},
 		detectUrlQuery: function(){

@@ -48,7 +48,7 @@ $(document).ready(function(){
 		var buttonIcon = $('#imageFileChooser').prev('i');
 		var acceptIcon = $('.youfind-modal-accept').children('i')[0];
 		$(buttonIcon).attr('class', 'fa fa-upload');
-		$(acceptIcon).attr('class', '');
+		$(acceptIcon).attr('class', 'fa fa-search');
 	});
 	App.modal.linkModal($('#settingsButton'));
 });
