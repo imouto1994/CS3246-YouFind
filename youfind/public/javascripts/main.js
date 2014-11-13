@@ -210,6 +210,7 @@ App.main = (function(){
 				html += 		'<p class="youfind-result-channel">' + video.channelTitle + '</p>'
 				html += 		'<p class="youfind-result-date">' + video.publishedAt.substr(0, video.publishedAt.indexOf("T")) + '</p>'
 				html +=			'<p class="youfind-result-views">' + video.viewCount + ' views</p>'
+				html += 		'<p class="youfind-result-description">' + video.description + '</p>'
 				html +=			'<div class="g-ytsubscribe"></div>'
 				html += 	'</figcaption>'
 			 	html += '</figure>'
@@ -228,6 +229,7 @@ App.main = (function(){
 					if(player){
 						player.loadVideoById($(this).attr('value'));
 					}
+					relevanceFeedback($(this).parents("li")[0]);
 				})
 				App.modal.linkModal(this);
 			})
@@ -283,11 +285,13 @@ App.main = (function(){
 		}
 
 		/*get video topics using topic IDs and change term score with video title, description and related topics*/
-		function relevanceFeedback(index){
-			var video = $(".grid ul").eq(index);
-			var videoTitle = $(video).find(".title");
-			var videoDescription = $(video).find("description");
-
+		function relevanceFeedback(videoHtml){
+			console.log("relevanceFeedback");
+			console.log(videoHtml);
+			var videoTitle = $(videoHtml).find(".youfind-result-title").text();
+			var videoDescription = $(videoHtml).find(".youfind-result-description").text();
+			console.log(videoTitle);
+			console.log(videoDescription);
 			var tokenizedTitle = tokenizeText(videoTitle);
 			var tokenizedDescription = tokenizeText(videoDescription);
 
@@ -299,6 +303,7 @@ App.main = (function(){
 			termScoresList.forEach(function(termScore){
 				result += termScore.term+" "+termScore.score+"\t";
 			})
+			console.log(result);
 		}
 
 		function appendToTermScoreList(array, score, isSortNeeded){
@@ -431,5 +436,4 @@ $(document).ready(function(){
 	App.main.bindAcceptButton();
 	App.main.bindSearchButton();
 	App.main.detectUrlQuery();
-	App.main.readStopWordList();
 });
