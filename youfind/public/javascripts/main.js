@@ -550,7 +550,9 @@ App.main = (function(){
 		initializeYoutubePlayer: function(){
 			var params = { allowScriptAccess: "always", allowFullScreen: "true"};
     	var atts = { id: "resultPlayer"};
-    	swfobject.embedSWF("http://www.youtube.com/v/M7lc1UVf-VE?enablejsapi=1&playerapiid=ytplayer&version=3","youtube-api-player", "640", "360", "8", null, null, params, atts);
+    	swfobject.embedSWF("https://www.youtube.com/v/M7lc1UVf-VE?enablejsapi=1&playerapiid=ytplayer&version=3",
+    										"youtube-api-player", 
+    										"640", "360", "8", null, null, params, atts);
     	console.log("Load Youtube Player Successfully");
 		},
 		bindEnterKey: function() {
