@@ -214,6 +214,10 @@ label {
 	padding: 0.5em 1.5em;
 }
 
+.youfind-modal-accept i[class="fa fa-check-circle"] {
+	margin-right: 0.5em;
+}
+
 /* Login Button */
 .round-button {
 	display: block;

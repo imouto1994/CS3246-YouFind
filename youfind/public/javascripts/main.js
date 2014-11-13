@@ -19,7 +19,8 @@ App.main = (function(){
 			var buttonIcon = $('#imageFileChooser').prev('i');
       var FR= new FileReader();
       FR.onload = function(e) {
-      	var uploadedImageData = e.target.result.replace(/^data:image\/(png|jpg|jpeg|gif);base64,/, "");
+      	var uploadedImageData = e.target.result.replace(
+      													/^data:image\/(png|jpg|jpeg|gif);base64,/, "");
       	$.ajax({
       		url: 'https://api.imgur.com/3/image',
       		type: 'POST',
@@ -41,6 +42,7 @@ App.main = (function(){
       			$(buttonIcon).addClass('fa-check-circle');
       			currentImageURL = json.data.link;
       			App.modal.removeAllModals();
+      			$('.search-button').trigger('click');
       		},
       		error: function(json){
       			$(buttonIcon).removeClass('fa-circle-o-notch fa-spin');
@@ -142,8 +144,7 @@ App.main = (function(){
 				var result = response.result;
 				var counter = 0;
 				if (result.items.length == 0) {
-					alert("SHIT HAPPEN");
-					displayResults();
+					displayNoResults();
 				} else {
 				for(index in result.items){
 					var item = result.items[index];
@@ -223,6 +224,10 @@ App.main = (function(){
 			}
 			bindPlayButtons();
 			addSubscrButtons();
+		}
+
+		function displayNoResults() {
+			$('.grid').html('<h1>No results found.</h1>');
 		}
 
 		function bindPlayButtons(){
@@ -368,8 +373,7 @@ App.main = (function(){
 		bindEnterKey: function() {
 			$("#searchTextField").on('keypress', function(e){
 				if(e.which == 13){ // is 'Enter' key
-					switchToSecondView(this);
-					search();
+					$('.search-button').trigger('click');
 				}
 			});
 		},
@@ -389,6 +393,7 @@ App.main = (function(){
       			$(acceptIcon).addClass('fa-check-circle');
 						currentImageURL = $('#imageURLTextField').val();
 						App.modal.removeAllModals();
+						$('.search-button').trigger('click');
 					} else {
 						$(acceptIcon).removeClass('fa-circle-o-notch fa-spin');
       			$(acceptIcon).addClass('fa-warning');
