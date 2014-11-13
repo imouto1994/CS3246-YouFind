@@ -593,6 +593,7 @@ input#imageFileChooser {
 	opacity: 1.0;
 }
 
+
 .grid .play-button {
 	position: relative;
 	margin: 0 auto;
@@ -646,6 +647,11 @@ input#imageFileChooser {
 	font-weight: 600;
 	font-size: 0.85em;
 }
+
+.grid .youfind-result-description {
+	display: none;
+}
+
 
 #imageUrl{
 	display: none;
