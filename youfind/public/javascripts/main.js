@@ -167,11 +167,6 @@ App.main = (function(){
 				appendToTermScoreList(tokenizedTitle, 3);
 				appendToTermScoreList(tokenizedContent, 1, true);
 
-				console.log(title);
-				console.log("Best guess'\t"+tokenizedBestGuess);
-				console.log("Filtered titles\t"+tokenizedTitle);
-				console.log("Filtered contents\t"+tokenizedContent);
-				console.log($(this));
 			});
 		 	termScoresList.sort(compare);
 			if(test){
@@ -179,16 +174,19 @@ App.main = (function(){
 				console.log("====================");
 				console.log("Google search result");
 				console.log("====================");
+				console.log("The best guess from Google:\t"+bestGuess);
 				termScoresList.forEach(function(termScore){
 					if(termScore.score > 1) {
 						result += termScore.term+" "+termScore.score+"\t";
 					}
-				})
-				console.log(result);
+				});
+				console.log(result+"\n");
 			}
 		}
 
 		function searchVideos(terms) {
+			videos = [];
+			
 			//prepare for youtube query
 			var str = ""
 			for(var i = 0; i < termScoresList.length && i < 3; i++){
@@ -391,7 +389,6 @@ App.main = (function(){
 			$('.feedback-button').each(function(){
 				$(this).on('click', function(e){
 					e.preventDefault();
-					relevanceFeedback($(this).parents("li")[0], 2);
 					var mode = 'auto';
 					var selectedMode = $("input[type='radio'][name='feedback']:checked");
 					if(selectedMode.length > 0){
@@ -399,8 +396,9 @@ App.main = (function(){
 					}
 					if(mode == 'auto'){
 						$('.feedback-button').prop('disabled', true);
-						processImageSearch();
-					}
+						relevanceFeedback($(this).parents("li")[0], 2, searchVideos);
+					} else 
+						relevanceFeedback($(this).parents("li")[0], 2);
 				});
 			});
 		}	
@@ -418,14 +416,22 @@ App.main = (function(){
 
 
 		/*get video topics using topic IDs and change term score with video title, description and related topics*/
-		function relevanceFeedback(videoHtml, factor){
+		function relevanceFeedback(videoHtml, factor, callback){
 			factor = factor || 1;
 
 			var topics = [];
+			var index = $(".grid ul li").index($(videoHtml));
+			var topicIds = videos[index].topicIds;
+			var tagList = [];
+
+			if(test)
+				console.log("video "+index+" clicked and doing relevance feedback");
+
 			getVideoTopics();
 
+
 			function getVideoTopics(){
-				var topicIds = videos[index].topicIds;
+
 				var counter = 0;
 
 				if(topicIds && ! typeof topicIds !== undefined){
@@ -446,41 +452,67 @@ App.main = (function(){
 				var tokenizedTitle = tokenizeText(videoTitle);
 				var tokenizedDescription = tokenizeText(videoDescription);
 
+				var result = "termscoreList: ";
+				termScoresList.forEach(function(termScore){
+					if(termScore.score > 1){
+						result += termScore.term+" "+termScore.score+"\t";
+					}
+				});
+				console.log(result+"\n");
 
 				appendToTermScoreList(tokenizedTitle, 3 * factor);
 				appendToTermScoreList(tokenizedDescription, 1 * factor);
 
-				if(topicIds && ! typeof topicIds !== undefined){
+				if(topicIds && typeof topicIds !== undefined){
 					//temporarily just utlize the first topic
 					var topic = topics[0];
-					var tagList = [];
 					var tagMaxNum = 10;
 					traverseTags(topic, tagMaxNum);
-					appendToTermScoreList(tagList, 1 * factor);
+
+					var tokenizedTagList = [];
+					tagList.forEach(function(tag){
+						var tokenizedTags = tokenizeText(tag);
+						tokenizedTags.forEach(function(tokenizedTag){
+							tokenizedTagList.push(tokenizedTag);
+						})
+					})
+					if(tokenizedTagList.length > 10)
+						tokenizedTagList = tokenizedTagList.slice(0,10);
+					appendToTermScoreList(tokenizedTagList, 1 * factor);
+
+					if(test){
+						console.log("TagList from topics related to the video:");
+						console.log(tokenizedTagList);
+						console.log();
+					}
 				}
 
 				termScoresList.sort(compare);
 
+				if(callback)
+					callback();
+
 				if(test){
-					console.log("====================");
-					console.log("Google search result");
-					console.log("====================");
+					console.log("==========================");
+					console.log("Relevance feedback result");
+					console.log("==========================");
 					var result = "";
 					termScoresList.forEach(function(termScore){
 						if(termScore.score > 1){
 							result += termScore.term+" "+termScore.score+"\t";
 						}
 					});
+					console.log(result+"\n");
 				}
 
 				function traverseTags(obj, maxNum){
 					if(typeof obj == 'object')
 						for(var key in obj){
-							if(tagList.length > tagMaxNum)
+							if(tagList.length > maxNum)
 								return;
 				    		if(key == "text")
 				    			tagList.push(obj[key]);
-				    		traverseTags(obj[key]);
+				    		traverseTags(obj[key], maxNum);
 				    	}
 				}
 			}
@@ -489,11 +521,19 @@ App.main = (function(){
 		/*Auxiliary functions for text retrieval*/
 		function appendToTermScoreList(array, score, isSortNeeded){
 
-			$.each(array, function(i, term){
+			//Copy a termsList from termScoresList
+			termsList = [];
+			for(var i = 0; i < termScoresList.length; i++){
+				termsList.push(termScoresList[i].term);
+			}
+
+			for(var i = 0; i < array.length; i++){
+				var term = array[i];
 				var aScore = score;
 				if(isStopWord(term))
 					aScore = score * 0.5;
 				var matchIndex = $.inArray(term, termsList);
+
 			    if(matchIndex === -1){
 					var termScore = {term: term, score: aScore};
 			    	termScoresList.push(termScore);
@@ -503,7 +543,7 @@ App.main = (function(){
 			    	if(term != termScoresList[matchIndex].term)
 			    		console.log("Match error "+term+" "+termScoresList[matchIndex].term+" "+matchIndex);
 			    }
-			});
+			};
 		}
 
 		function isStopWord(word){
