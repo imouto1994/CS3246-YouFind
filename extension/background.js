@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener(
 )
 
 function redirect(info){
-	var imageUrl = inderUrl + "?imageUrl=" + info.srcUrl;
+	var imageUrl = finderUrl + "?imageUrl=" + info.srcUrl;
 	chrome.tabs.create({url: imageUrl});
 }
 
