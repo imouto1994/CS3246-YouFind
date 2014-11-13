@@ -8,8 +8,7 @@ App.main = (function(){
  	var currentImageURL = null;
  	var counter = 0;
 	var english = /^[A-Za-z0-9]*$/;
-	var termScoresList = [];
-	var termsList = [];
+
 
 
  	/* Reconfigure text field for search field after switching view */
@@ -93,8 +92,11 @@ App.main = (function(){
 	}
 
 	function processImageSearch() {
-		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;			
-		var videos = []
+		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;	
+
+		var termScoresList = [];
+		var termsList = [];		
+		var videos = [];
 
 		var time_processImageSearch = 0;
 		var time_googleImageSearch = 0;
@@ -190,6 +192,10 @@ App.main = (function(){
 			//prepare for youtube query
 			var str = ""
 			for(var i = 0; i < termScoresList.length && i < 3; i++){
+				str += termScoresList[i].term + " ";
+			}
+			for(var i = 3; i < termScoresList.length && i < 5; i++){
+				if(termScoresList[i].score >= 8)
 					str += termScoresList[i].term + " ";
 			}
 			var textQueryTerms = $('.fancyInput').text().trim().split('\\s+');
