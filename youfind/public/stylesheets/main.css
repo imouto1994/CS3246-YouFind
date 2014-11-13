@@ -280,6 +280,11 @@ label {
 	background: #e74c3c;
 }
 
+[id^=___ytsubscribe] {
+	vertical-align: middle !important;
+	float: right !important;
+}
+
   /*******************************************************/	
  /*											HEADERS											  	*/
 /*******************************************************/
