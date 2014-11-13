@@ -3,9 +3,14 @@ var App = App || {};
 var test = true;
 
 App.main = (function(){
-	var hasSwitchedToSecondView = false
+	var hasSwitchedToSecondView = false;
+	var oldImageURL = null;
  	var currentImageURL = null;
+ 	var counter = 0;
 	var english = /^[A-Za-z0-9]*$/;
+	var termScoresList = [];
+	var termsList = [];
+
 
  	/* Reconfigure text field for search field after switching view */
 	function configureTextField(input){
@@ -21,7 +26,8 @@ App.main = (function(){
 			var buttonIcon = $('#imageFileChooser').prev('i');
       var FR= new FileReader();
       FR.onload = function(e) {
-      	var uploadedImageData = e.target.result.replace(/^data:image\/(png|jpg|jpeg|gif);base64,/, "");
+      	var uploadedImageData = e.target.result.replace(
+      													/^data:image\/(png|jpg|jpeg|gif);base64,/, "");
       	$.ajax({
       		url: 'https://api.imgur.com/3/image',
       		type: 'POST',
@@ -43,11 +49,11 @@ App.main = (function(){
       			$(buttonIcon).addClass('fa-check-circle');
       			currentImageURL = json.data.link;
       			App.modal.removeAllModals();
+      			$('.search-button').trigger('click');
       		},
       		error: function(json){
       			$(buttonIcon).removeClass('fa-circle-o-notch fa-spin');
       			$(buttonIcon).addClass('fa-warning');
-      			console.log("Cannot upload image");
       		}
       	})
       };       
@@ -87,11 +93,8 @@ App.main = (function(){
 	}
 
 	function processImageSearch() {
-		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;
-		var termScoresList = [];
-		var termsList = [];	
-		var videos = [];
-		var counter = 0;
+		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;			
+		var videos = []
 
 		var time_processImageSearch = 0;
 		var time_googleImageSearch = 0;
@@ -104,34 +107,42 @@ App.main = (function(){
 		var start_queryVideoStat = 0;
 		var start_processImageSearch = new Date();
 		var start_googleImageSearch = new Date();
-		$.ajax({
-			url: '/search',
-			type: 'GET',
-			data: {
-				searchURL: googleImageSearchURL
-			},
-			beforeSend: function() {
-				$('.grid ul').empty();
-				$('.grid').html('<i class="fa fa-circle-o-notch fa-spin"></i>');
-			},
-			success: function(data) {
-				if(test)
-					time_googleImageSearch += new Date() - start_googleImageSearch;
 
-				var start_googleDomAnalysis = new Date();
-				extractTerms(data);
-				if(test)
-					time_googleDomAnalysis += new Date() - start_googleDomAnalysis;
+		if(oldImageURL != currentImageURL){
+			oldImageURL = currentImageURL;
+			$.ajax({
+				url: '/search',
+				type: 'GET',
+				data: {
+					searchURL: googleImageSearchURL
+				},
+				beforeSend: function() {
+					$('.grid ul').empty();
+					$('.grid').html('<i class="fa fa-circle-o-notch fa-spin"></i>');
+				},
+				success: function(data) {
+					if(test)
+						time_googleImageSearch += new Date() - start_googleImageSearch;
 
-				if(test)
-					start_youtubeSearch = new Date();
-				searchVideos();
+					var start_googleDomAnalysis = new Date();
+					extractTerms(data);
+					if(test)
+						time_googleDomAnalysis += new Date() - start_googleDomAnalysis;
 
-			},
-			error: function(data) {
-				console.log(data);
-			}
-		});
+					if(test)
+						start_youtubeSearch = new Date();
+					searchVideos();
+
+				},
+				error: function(data) {
+					console.log(data);
+				}
+			});
+		} else {
+			$('.search-button > i').attr('class', 'fa fa fa-circle-o-notch fa-spin');
+			$('.search-button').prop('disabled', true);
+			searchVideos();
+		}
 
 		function extractTerms(data) {
 			var bestGuess = $(data).find(".qb-b").text();
@@ -159,9 +170,8 @@ App.main = (function(){
 				console.log("Filtered titles\t"+tokenizedTitle);
 				console.log("Filtered contents\t"+tokenizedContent);
 				console.log($(this));
-			})
-		    termScoresList.sort(compare);
-
+			});
+		 	termScoresList.sort(compare);
 			if(test){
 				var result = "";
 				console.log("====================");
@@ -177,13 +187,10 @@ App.main = (function(){
 		}
 
 		function searchVideos(terms) {
-
 			//prepare for youtube query
 			var str = ""
-			for(var i = 0; i < termScoresList.length && i < 5; i++){
-				if(termScoresList[i].score > 10){
+			for(var i = 0; i < termScoresList.length && i < 3; i++){
 					str += termScoresList[i].term + " ";
-				}
 			}
 			var textQueryTerms = $('.fancyInput').text().trim().split('\\s+');
 			for(term in textQueryTerms){
@@ -198,7 +205,6 @@ App.main = (function(){
 			if(selectedOrder.length > 0){
 				order = selectedOrder.val();
 			}
-			console.log(order);
 			var request = gapi.client.youtube.search.list({
 				part: 'snippet',
 				q: str.trim(),
@@ -211,27 +217,48 @@ App.main = (function(){
 					time_youtubeSearch += new Date() - start_youtubeSearch;
 
 				var result = response.result;
-				for(index in result.items){
-					var item = result.items[index];
-					var video = {};
-					video.id = item.id.videoId;
-					video.title = item.snippet.title;
-					video.publishedAt = item.snippet.publishedAt;
-					video.description = item.snippet.description;
-					video.channelTitle = item.snippet.channelTitle;
-					video.thumbnail = item.snippet.thumbnails.medium.url;
-
-					start_queryVideoStat = new Date();
-					searchStatistics(video, result.items.length);
+				counter = 0;
+				if (result.items.length == 0) {
+					displayNoResults();
+				} else {
+					for(index in result.items){
+						var item = result.items[index];
+						var video = {};
+						video.id = item.id.videoId;
+						video.title = item.snippet.title;
+						video.publishedAt = item.snippet.publishedAt;
+						video.description = item.snippet.description;
+						video.channelId = item.snippet.channelId;
+						video.channelTitle = item.snippet.channelTitle;
+						video.thumbnail = item.snippet.thumbnails.medium.url;
+						fillUpName(video, result.items.length);
+					}
 				}
 			});
 		}
 
-		function searchStatistics(video, count){
+		function fillUpName(video, count) {
+			if(video.channelTitle.trim().length){
+				searchStatistics(video, count)
+			} else {
+				var channelRequest = gapi.client.youtube.channels.list({
+					part: 'snippet',
+					id: video.channelId,
+					maxResults: 1
+				});
+				channelRequest.execute(function(channelResponse){
+					var channelTitle = channelResponse.result.items[0].snippet.title;
+					video.channelTitle = channelTitle;
+					searchStatistics(video, count);
+				});
+			}
+		}
 
+		function searchStatistics(video, count){
 			var videoRequest = gapi.client.youtube.videos.list({
 				part: 'statistics, topicDetails, recordingDetails',
-				id: video.id
+				id: video.id,
+				maxResults: 1
 			});
 
 			videoRequest.execute(function(videoResponse){
@@ -262,9 +289,11 @@ App.main = (function(){
 			});
 		}
 
-
-
 		function displayResults(){
+			if($('.search-button').prop('disabled')){
+				$('.search-button > i').attr('class', 'fa fa-search');
+				$('.search-button').prop('disabled', false);
+			}
 			var start_displayVideos = new Date();
 
 			$('.grid').html('<ul></ul>');
@@ -276,13 +305,17 @@ App.main = (function(){
 				html += 		'<div class="youfind-overlay">'
 				html += 			'<button type="button" value="' +  video.id + '" class="button play-button youfind-modal-trigger" data-modal="videoModal">'
 				html +=					'<i class="fa fa-play-circle"></i>'
-				html +=     		'</button>'
+				html +=     	'</button>'
+				html +=       '<button type="button" value="' + video.id +  '" class="button feedback-button">'
+				html += 				'<i class="fa fa-smile-o"></i>'
+				html +=  			'</button>'
 				html += 		'</div>'
 				html += 		'<img src="' + video.thumbnail + '">'
 				html +=		'</div>'
 				html +=		'<figcaption>'
 				html +=			'<h3 class="youfind-result-title">' + video.title + '</h3>'
 				html += 		'<p class="youfind-result-channel">' + video.channelTitle + '</p>'
+				html += 		'<p class="youfind-result-channelID">' + video.channelId + '</p>'
 				html += 		'<p class="youfind-result-date">' + video.publishedAt.substr(0, video.publishedAt.indexOf("T")) + '</p>'
 				html +=			'<p class="youfind-result-views">' + video.viewCount + ' views</p>'
 				html += 		'<p class="youfind-result-description">' + video.description + '</p>'
@@ -293,6 +326,7 @@ App.main = (function(){
 			 	$('.grid ul').append(html);
 			}
 			bindPlayButtons();
+			bindRelevanceFeedbackButtons();
 			addSubscrButtons();
 
 			if(test){
@@ -300,6 +334,14 @@ App.main = (function(){
 				time_processImageSearch += new Date() - start_processImageSearch;
 				printBenchmark();
 			}
+		}
+
+		function displayNoResults() {
+			if($('.search-button').prop('disabled')){
+				$('.search-button > i').attr('class', 'fa fa-search');
+				$('.search-button').prop('disabled', false);
+			}
+			$('.grid').html('<h1>No results found. :(</h1>');
 		}
 
 		function printBenchmark(){
@@ -326,31 +368,50 @@ App.main = (function(){
 		function bindPlayButtons(){
 			$('.play-button').each(function(){
 				$(this).on('click', function(e){
-					console.log("TEST");
+					e.preventDefault();
 					var player = document.getElementById('resultPlayer');
-					if(player){
+					if(typeof player != 'undefined'){
 						player.loadVideoById($(this).attr('value'));
 					}
 					relevanceFeedback($(this).parents("li")[0]);
-				})
+				});
 				App.modal.linkModal(this);
-			})
+			});
 		}
+
+		function bindRelevanceFeedbackButtons() {
+			$('.feedback-button').each(function(){
+				$(this).on('click', function(e){
+					e.preventDefault();
+					relevanceFeedback($(this).parents("li")[0], 2);
+					var mode = 'auto';
+					var selectedMode = $("input[type='radio'][name='feedback']:checked");
+					if(selectedMode.length > 0){
+						mode = selectedMode.val();
+					}
+					if(mode == 'auto'){
+						$('.feedback-button').prop('disabled', true);
+						processImageSearch();
+					}
+				});
+			});
+		}	
 
 		function addSubscrButtons(){
 			$.getScript("https://apis.google.com/js/platform.js");
 			$(".g-ytsubscribe").each(function(index, element){
-				var channelTitle = $(this).siblings(".youfind-result-channel").text();
-				if(channelTitle != ""){
-					$(this).attr("data-channel", channelTitle);
+				var channelId = $(this).siblings(".youfind-result-channelID").text();
+				if(channelId != ""){
+					$(this).attr("data-channelid", channelId);
 				}
-			})
+			});
 		}
 
 
 
 		/*get video topics using topic IDs and change term score with video title, description and related topics*/
-		function relevanceFeedback(videoHtml){
+		function relevanceFeedback(videoHtml, factor){
+			factor = factor || 1;
 
 			var topics = [];
 			getVideoTopics();
@@ -382,9 +443,9 @@ App.main = (function(){
 				var tagMaxNum = 10;
 				traverseTags(topic, tagMaxNum);
 
-				appendToTermScoreList(tokenizedTitle, 3);
-				appendToTermScoreList(tokenizedDescription, 1);
-				appendToTermScoreList(tagList, 1);
+				appendToTermScoreList(tokenizedTitle, 3 * factor);
+				appendToTermScoreList(tokenizedDescription, 1 * factor);
+				appendToTermScoreList(tagList, 1 * factor);
 
 				termScoresList.sort(compare);
 
@@ -413,8 +474,7 @@ App.main = (function(){
 			}
 		}
 
-/*Auxiliary functions for text retrieval*/
-
+		/*Auxiliary functions for text retrieval*/
 		function appendToTermScoreList(array, score, isSortNeeded){
 
 			$.each(array, function(i, term){
@@ -484,8 +544,7 @@ App.main = (function(){
 		bindEnterKey: function() {
 			$("#searchTextField").on('keypress', function(e){
 				if(e.which == 13){ // is 'Enter' key
-					switchToSecondView(this);
-					search();
+					$('.search-button').trigger('click');
 				}
 			});
 		},
@@ -505,6 +564,7 @@ App.main = (function(){
       			$(acceptIcon).addClass('fa-check-circle');
 						currentImageURL = $('#imageURLTextField').val();
 						App.modal.removeAllModals();
+						$('.search-button').trigger('click');
 					} else {
 						$(acceptIcon).removeClass('fa-circle-o-notch fa-spin');
       			$(acceptIcon).addClass('fa-warning');
@@ -515,8 +575,14 @@ App.main = (function(){
 		bindSearchButton: function(){
 			$('.search-button').on('click', function(e) {
 				e.preventDefault();
-				switchToSecondView($('#searchTextField'));
-				search();
+				if(isValidForSearch()){
+					switchToSecondView($('#searchTextField'));
+					search();
+				}
+
+				function isValidForSearch() {
+					return currentImageURL != null;
+				}
 			});
 		},
 		detectUrlQuery: function(){

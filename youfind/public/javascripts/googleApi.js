@@ -84,8 +84,8 @@ function setProfilePicture(url){
 
 function initializeLoginButton(){
   loginButton = $('#profileButton')[0];
-  $(loginButton).addClass('profile-button');
-  $(loginButton).removeClass('login-button');
+  $(loginButton).addClass('login-button');
+  $(loginButton).removeClass('profile-button');
   $(loginButton).click(function() {
       gapi.auth.authorize({
         client_id: OAUTH2_CLIENT_ID,
