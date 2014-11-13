@@ -231,19 +231,22 @@ App.main = (function(){
 
 			var videoRequest = gapi.client.youtube.videos.list({
 				part: 'statistics, topicDetails, recordingDetails',
-				id: video.id,
+				id: video.id
 			});
 
 			videoRequest.execute(function(videoResponse){
 				var videoResult = videoResponse.result;
-				video.viewCount = videoResult.items[0].statistics.viewCount;
+				var videoResultItem = videoResult.items[0];
+				video.viewCount = videoResultItem.statistics.viewCount;
 
-				video.topicIds = videoResult.items[0].topicDetails.topicIds;
-				video.relevantTopicIds = videoResult.items[0].topicDetails.relevantTopicIds;
-				if(videoResult.items[0].recordingDetails) {
-					video.location = videoResult.items[0].recordingDetails.location;
-					console.log("video "+videos.length+"has location");
-					console.log(video.location);
+				video.topicIds = videoResultItem.topicDetails.topicIds;
+				video.relevantTopicIds = videoResultItem.topicDetails.relevantTopicIds;
+				if(videoResultItem.recordingDetails) {
+					video.location = videoResultItem.recordingDetails.location;
+					if(test) {
+						console.log("video "+videos.length+"has location ");
+						console.log(videoResultItem.recordingDetails);
+					}
 				}
 				videos.push(video);
 
