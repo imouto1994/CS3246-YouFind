@@ -2,6 +2,7 @@ var request = require('request');
 var express = require('express');
 var router = express.Router();
 
+
 /* GET users listing. */
 router.get('/', function(req, res) {
 	
@@ -16,7 +17,12 @@ router.get('/', function(req, res) {
 		followAllRedirects: false,
 		maxRedirects: 3
 	}
+	var start = new Date();
 	request(options, function(error, response, body){
+
+		var end = new Date();
+		console.log("Image search time:\t"+(end - start)+" ms");
+
 		res.writeHead(200, {'Content-Type':'text/html'});
 		res.write(body);
 		res.end();

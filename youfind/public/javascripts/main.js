@@ -1,5 +1,7 @@
 var App = App || {};
 
+var test = true;
+
 App.main = (function(){
 	var hasSwitchedToSecondView = false;
 	var oldImageURL = null;
@@ -94,7 +96,20 @@ App.main = (function(){
 		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;			
 		var videos = []
 
+		var time_processImageSearch = 0;
+		var time_googleImageSearch = 0;
+		var time_googleDomAnalysis = 0;
+		var time_youtubeSearch = 0;
+		var time_queryVideoStat = 0;
+		var time_displayVideos = 0;
+
+		var start_youtubeSearch = 0;
+		var start_queryVideoStat = 0;
+		var start_processImageSearch = new Date();
+		var start_googleImageSearch = new Date();
+
 		if(oldImageURL != currentImageURL){
+			oldImageURL = currentImageURL;
 			$.ajax({
 				url: '/search',
 				type: 'GET',
@@ -106,20 +121,73 @@ App.main = (function(){
 					$('.grid').html('<i class="fa fa-circle-o-notch fa-spin"></i>');
 				},
 				success: function(data) {
+					if(test)
+						time_googleImageSearch += new Date() - start_googleImageSearch;
+
+					var start_googleDomAnalysis = new Date();
 					extractTerms(data);
+					if(test)
+						time_googleDomAnalysis += new Date() - start_googleDomAnalysis;
+
+					if(test)
+						start_youtubeSearch = new Date();
 					searchVideos();
+
 				},
 				error: function(data) {
 					console.log(data);
 				}
 			});
 		} else {
-			$('.search-button').attr('class', 'fa fa fa-circle-o-notch fa-spin');
+			$('.search-button > i').attr('class', 'fa fa fa-circle-o-notch fa-spin');
 			$('.search-button').prop('disabled', true);
 			searchVideos();
 		}
 
-		function searchVideos() {
+		function extractTerms(data) {
+			var bestGuess = $(data).find(".qb-b").text();
+			var searchResult = $(data).find(".srg");
+
+			var tokenizedBestGuess = tokenizeText(bestGuess);
+			appendToTermScoreList(tokenizedBestGuess, 5)
+
+			$(searchResult).find('.rc').each(function(){
+				var title = $(this).find('.r').text();
+				var content = $(this).find('.st').text();
+
+				//only consider English webpage
+				if(!isEnglish(title)) return;
+
+				var tokenizedTitle = tokenizeText(title);
+				var tokenizedContent = tokenizeText(content);
+
+				//add filtered terms to a final array
+				appendToTermScoreList(tokenizedTitle, 3);
+				appendToTermScoreList(tokenizedContent, 1, true);
+
+				console.log(title);
+				console.log("Best guess'\t"+tokenizedBestGuess);
+				console.log("Filtered titles\t"+tokenizedTitle);
+				console.log("Filtered contents\t"+tokenizedContent);
+				console.log($(this));
+			});
+		 	termScoresList.sort(compare);
+			if(test){
+				var result = "";
+				console.log("====================");
+				console.log("Google search result");
+				console.log("====================");
+				termScoresList.forEach(function(termScore){
+					if(termScore.score > 1) {
+						result += termScore.term+" "+termScore.score+"\t";
+					}
+				})
+				console.log(result);
+			}
+		}
+
+		function searchVideos(terms) {
+			//prepare for youtube query
 			var str = ""
 			for(var i = 0; i < termScoresList.length && i < 3; i++){
 					str += termScoresList[i].term + " ";
@@ -130,7 +198,7 @@ App.main = (function(){
 					str += textQueryTerms[term] + " ";
 				}
 			}
-			console.log("Query String: " + str);
+			console.log("Youtube query String: " + str);
 
 			var order = 'relevance';
 			var selectedOrder = $("input[type='radio'][name='order']:checked");
@@ -145,6 +213,9 @@ App.main = (function(){
 				type: 'video'
 			});
 			request.execute(function(response) {
+				if(test)
+					time_youtubeSearch += new Date() - start_youtubeSearch;
+
 				var result = response.result;
 				counter = 0;
 				if (result.items.length == 0) {
@@ -192,37 +263,39 @@ App.main = (function(){
 
 			videoRequest.execute(function(videoResponse){
 				var videoResult = videoResponse.result;
-				video.viewCount = videoResult.items[0].statistics.viewCount;
+				var videoResultItem = videoResult.items[0];
+				video.viewCount = videoResultItem.statistics.viewCount;
 
-				if(videoResult.items[0].recordingDetails) {
-					video.location = videoResult.items[0].recordingDetails.location;
-					console.log("video "+videos.length+"has location");
-					console.log(video.location);
+				video.topicIds = videoResultItem.topicDetails.topicIds;
+				video.relevantTopicIds = videoResultItem.topicDetails.relevantTopicIds;
+				if(videoResultItem.recordingDetails) {
+					video.location = videoResultItem.recordingDetails.location;
+					if(test) {
+						console.log("video "+videos.length+"has location ");
+						console.log(videoResultItem.recordingDetails);
+					}
 				}
 				videos.push(video);
+
 				//only display results when this is the last video
 				if(counter >= count - 1){
+					if(test)
+						time_queryVideoStat += new Date() - start_queryVideoStat;
+
 					displayResults();
+					counter == 0;
 				}
 				counter++;
 			});
 		}
 
-		function printText(obj){
-			if(typeof obj == 'object'){
-				for(var key in obj){
-	    		if(key == "text")
-	    			console.log(obj[key]);
-	    		printText(obj[key]);
-		    }
-		  }
-		}
-
 		function displayResults(){
 			if($('.search-button').prop('disabled')){
-				$('.search-button').attr('class', 'fa fa-search');
+				$('.search-button > i').attr('class', 'fa fa-search');
 				$('.search-button').prop('disabled', false);
 			}
+			var start_displayVideos = new Date();
+
 			$('.grid').html('<ul></ul>');
 			for(index in videos){
 				video = videos[index];
@@ -255,13 +328,44 @@ App.main = (function(){
 			bindPlayButtons();
 			bindRelevanceFeedbackButtons();
 			addSubscrButtons();
+
+			if(test){
+				time_displayVideos += new Date() - start_displayVideos;
+				time_processImageSearch += new Date() - start_processImageSearch;
+				printBenchmark();
+			}
 		}
 
 		function displayNoResults() {
+			if($('.search-button').prop('disabled')){
+				$('.search-button > i').attr('class', 'fa fa-search');
+				$('.search-button').prop('disabled', false);
+			}
 			$('.grid').html('<h1>No results found. :(</h1>');
 		}
 
-		function bindPlayButtons() {
+		function printBenchmark(){
+			var benchmarkResult = ""; 
+			benchmarkResult += "================\n";
+			benchmarkResult += "Benchmark Result\n";
+			benchmarkResult += "================\n";
+			benchmarkResult += "Total time to search and display the video results using image:\t"+time_processImageSearch+" ms\n";
+			benchmarkResult += "Time for google image searching:\t"+time_googleImageSearch+" ms\n";
+			benchmarkResult += "Time for google response dom analysis\t"+time_googleDomAnalysis+" ms\n";
+			benchmarkResult += "Time for youtube searching:\t"+time_youtubeSearch+" ms\n";
+			benchmarkResult += "Time for querying statistics for each video result\t"+time_queryVideoStat+" ms\n";
+			benchmarkResult += "Time for displaying video results\t"+time_displayVideos+" ms\n";
+			console.log(benchmarkResult);
+
+			time_processImageSearch = 0;
+			time_googleImageSearch = 0;
+			time_googleDomAnalysis = 0;
+			time_youtubeSearch = 0;
+			time_queryVideoStat = 0;
+			time_displayVideos = 0;
+		}
+
+		function bindPlayButtons(){
 			$('.play-button').each(function(){
 				$(this).on('click', function(e){
 					e.preventDefault();
@@ -270,9 +374,9 @@ App.main = (function(){
 						player.loadVideoById($(this).attr('value'));
 					}
 					relevanceFeedback($(this).parents("li")[0]);
-				})
+				});
 				App.modal.linkModal(this);
-			})
+			});
 		}
 
 		function bindRelevanceFeedbackButtons() {
@@ -280,8 +384,17 @@ App.main = (function(){
 				$(this).on('click', function(e){
 					e.preventDefault();
 					relevanceFeedback($(this).parents("li")[0], 2);
-				})
-			})
+					var mode = 'auto';
+					var selectedMode = $("input[type='radio'][name='feedback']:checked");
+					if(selectedMode.length > 0){
+						mode = selectedMode.val();
+					}
+					if(mode == 'auto'){
+						$('.feedback-button').prop('disabled', true);
+						processImageSearch();
+					}
+				});
+			});
 		}	
 
 		function addSubscrButtons(){
@@ -291,69 +404,77 @@ App.main = (function(){
 				if(channelId != ""){
 					$(this).attr("data-channelid", channelId);
 				}
-			})
+			});
 		}
 
-		function extractTerms(data) {
-			termScoresList = []
-			termsList = []
-			oldImageURL = currentImageURL;
-			var start = new Date();				
-			var bestGuess = $(data).find(".qb-b").text();
-			var searchResult = $(data).find(".srg");
 
-			var tokenizedBestGuess = tokenizeText(bestGuess);
-			appendToTermScoreList(tokenizedBestGuess, 5)
-
-			$(searchResult).find('.rc').each(function(){
-				var title = $(this).find('.r').text();
-				var content = $(this).find('.st').text();
-
-				//only consider English webpage
-				if(!isEnglish(title)) return;
-
-				var tokenizedTitle = tokenizeText(title);
-				var tokenizedContent = tokenizeText(content);
-
-				//add filtered terms to a final array
-				appendToTermScoreList(tokenizedTitle, 3);
-				appendToTermScoreList(tokenizedContent, 1, true);
-			})
-		  termScoresList.sort(compare);
-			console.log("Result: ");
-			var result = "";
-			termScoresList.forEach(function(termScore){
-				result += termScore.term+" "+termScore.score+"\t";
-			})
-			console.log(result);
-			var end = new Date();
-			console.log("Timing for Dom analysis:\t"+(end-start)+" ms");
-		}
 
 		/*get video topics using topic IDs and change term score with video title, description and related topics*/
 		function relevanceFeedback(videoHtml, factor){
 			factor = factor || 1;
-			console.log("relevanceFeedback");
-			console.log(videoHtml);
-			var videoTitle = $(videoHtml).find(".youfind-result-title").text();
-			var videoDescription = $(videoHtml).find(".youfind-result-description").text();
-			console.log(videoTitle);
-			console.log(videoDescription);
-			var tokenizedTitle = tokenizeText(videoTitle);
-			var tokenizedDescription = tokenizeText(videoDescription);
 
-			appendToTermScoreList(tokenizedTitle, 3 * factor);
-			appendToTermScoreList(tokenizedDescription, 1 * factor);
+			var topics = [];
+			getVideoTopics();
 
-			termScoresList.sort(compare);
-			var result = "";
-			console.log("Terms Score After Feedback: ");
-			termScoresList.forEach(function(termScore){
-				result += termScore.term+" "+termScore.score+"\t";
-			})
-			console.log(result);
+			function getVideoTopics(){
+				var topicIds = videos[index].topicIds;
+				var relevantTopicIds = videos[index].relevantTopicIds;
+				var counter = 0;
+
+				//Just use the first topic temporarily
+			    var service_url = 'https://www.googleapis.com/freebase/v1/topic';
+			    var params = {};
+			    $.getJSON(service_url + topicIds[0] + '?callback=?', params, function(topic) {
+			    	topics.push(topic);
+			    	changeTermScore();
+			    });
+			}
+
+			function changeTermScore(){
+				var videoTitle = $(videoHtml).find(".youfind-result-title").text();
+				var videoDescription = $(videoHtml).find(".youfind-result-description").text();
+
+				var tokenizedTitle = tokenizeText(videoTitle);
+				var tokenizedDescription = tokenizeText(videoDescription);
+
+				//temporarily just utlize the first topic
+				var topic = topics[0];
+				var tagList = [];
+				var tagMaxNum = 10;
+				traverseTags(topic, tagMaxNum);
+
+				appendToTermScoreList(tokenizedTitle, 3 * factor);
+				appendToTermScoreList(tokenizedDescription, 1 * factor);
+				appendToTermScoreList(tagList, 1 * factor);
+
+				termScoresList.sort(compare);
+
+				if(test){
+					console.log("====================");
+					console.log("Google search result");
+					console.log("====================");
+					var result = "";
+					termScoresList.forEach(function(termScore){
+						if(termScore.score > 1){
+							result += termScore.term+" "+termScore.score+"\t";
+						}
+					});
+				}
+
+				function traverseTags(obj, maxNum){
+					if(typeof obj == 'object')
+						for(var key in obj){
+							if(tagList.length > tagMaxNum)
+								return;
+				    		if(key == "text")
+				    			tagList.push(obj[key]);
+				    		traverseTags(obj[key]);
+				    	}
+				}
+			}
 		}
 
+		/*Auxiliary functions for text retrieval*/
 		function appendToTermScoreList(array, score, isSortNeeded){
 
 			$.each(array, function(i, term){
@@ -411,6 +532,7 @@ App.main = (function(){
 			return filteredTerms;
 		}
 	}
+
 
 	return {
 		initializeYoutubePlayer: function(){
