@@ -18,12 +18,12 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "css": ["style.css"],
-      "js": ["script.js", "thirdParty/jquery.min.js"]
+      "js": ["thirdParty/jquery.min.js", "script.js"]
     }
   ],
 
   "permissions": [
-    "tabs", "http://*/*", "https://*/*"
+    "tabs", "contextMenus", "http://*/*", "https://*/*"
   ],
 
   "web_accessible_resources": [

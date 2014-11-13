@@ -301,22 +301,27 @@ App.main = (function(){
 			})
 		}
 
-
-
 		function appendToTermScoreList(array, score, isSortNeeded){
 
 			$.each(array, function(i, term){
-				var matchIndex = $.inArray(term, termsList)
+				var aScore = score;
+				if(isStopWord(term))
+					aScore = score * 0.5;
+				var matchIndex = $.inArray(term, termsList);
 			    if(matchIndex === -1){
-					var termScore = {term: term, score: score};
+					var termScore = {term: term, score: aScore};
 			    	termScoresList.push(termScore);
 			    	termsList.push(term);
 			    } else {
-			    	termScoresList[matchIndex].score += score;
+			    	termScoresList[matchIndex].score += aScore;
 			    	if(term != termScoresList[matchIndex].term)
 			    		console.log("Match error "+term+" "+termScoresList[matchIndex].term+" "+matchIndex);
 			    }
 			});
+		}
+
+		function isStopWord(word){
+			return ($.inArray(word, stopWordList) != -1);
 		}
 
 		function compare(termScore1, termScore2){
@@ -426,4 +431,5 @@ $(document).ready(function(){
 	App.main.bindAcceptButton();
 	App.main.bindSearchButton();
 	App.main.detectUrlQuery();
+	App.main.readStopWordList();
 });
