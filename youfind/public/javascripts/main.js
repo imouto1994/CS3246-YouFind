@@ -164,10 +164,13 @@ App.main = (function(){
 
 			if(test){
 				var result = "";
-				console.log("=====================")
+				console.log("====================");
 				console.log("Google search result");
+				console.log("====================");
 				termScoresList.forEach(function(termScore){
-					result += termScore.term+" "+termScore.score+"\t";
+					if(termScore.score > 1) {
+						result += termScore.term+" "+termScore.score+"\t";
+					}
 				})
 				console.log(result);
 			}
@@ -235,6 +238,8 @@ App.main = (function(){
 				var videoResult = videoResponse.result;
 				video.viewCount = videoResult.items[0].statistics.viewCount;
 
+				video.topicIds = videoResult.items[0].topicDetails.topicIds;
+				video.relevantTopicIds = videoResult.items[0].topicDetails.relevantTopicIds;
 				if(videoResult.items[0].recordingDetails) {
 					video.location = videoResult.items[0].recordingDetails.location;
 					console.log("video "+videos.length+"has location");
@@ -254,14 +259,7 @@ App.main = (function(){
 			});
 		}
 
-		function printText(obj){
-			if(typeof obj == 'object')
-				for(var key in obj){
-		    		if(key == "text")
-		    			console.log(obj[key]);
-		    		printText(obj[key]);
-		    	}
-		}
+
 
 		function displayResults(){
 			var start_displayVideos = new Date();
@@ -350,24 +348,66 @@ App.main = (function(){
 
 		/*get video topics using topic IDs and change term score with video title, description and related topics*/
 		function relevanceFeedback(videoHtml){
-			console.log("relevanceFeedback");
-			console.log(videoHtml);
-			var videoTitle = $(videoHtml).find(".youfind-result-title").text();
-			var videoDescription = $(videoHtml).find(".youfind-result-description").text();
-			console.log(videoTitle);
-			console.log(videoDescription);
-			var tokenizedTitle = tokenizeText(videoTitle);
-			var tokenizedDescription = tokenizeText(videoDescription);
 
-			appendToTermScoreList(tokenizedTitle, 3);
-			appendToTermScoreList(tokenizedDescription, 1);
+			var topics = [];
+			getVideoTopics();
 
-			termScoresList.sort(compare);
-			var result = "";
-			termScoresList.forEach(function(termScore){
-				result += termScore.term+" "+termScore.score+"\t";
-			})
-			console.log(result);
+			function getVideoTopics(){
+				var topicIds = videos[index].topicIds;
+				var relevantTopicIds = videos[index].relevantTopicIds;
+				var counter = 0;
+
+				//Just use the first topic temporarily
+			    var service_url = 'https://www.googleapis.com/freebase/v1/topic';
+			    var params = {};
+			    $.getJSON(service_url + topicIds[0] + '?callback=?', params, function(topic) {
+			    	topics.push(topic);
+			    	changeTermScore();
+			    });
+			}
+
+			function changeTermScore(){
+				var videoTitle = $(videoHtml).find(".youfind-result-title").text();
+				var videoDescription = $(videoHtml).find(".youfind-result-description").text();
+
+				var tokenizedTitle = tokenizeText(videoTitle);
+				var tokenizedDescription = tokenizeText(videoDescription);
+
+				//temporarily just utlize the first topic
+				var topic = topics[0];
+				var tagList = [];
+				var tagMaxNum = 10;
+				traverseTags(topic, tagMaxNum);
+
+				appendToTermScoreList(tokenizedTitle, 3);
+				appendToTermScoreList(tokenizedDescription, 1);
+				appendToTermScoreList(tagList, 1);
+
+				termScoresList.sort(compare);
+
+				if(test){
+					console.log("====================");
+					console.log("Google search result");
+					console.log("====================");
+					var result = "";
+					termScoresList.forEach(function(termScore){
+						if(termScore.score > 1){
+							result += termScore.term+" "+termScore.score+"\t";
+						}
+					});
+				}
+
+				function traverseTags(obj, maxNum){
+					if(typeof obj == 'object')
+						for(var key in obj){
+							if(tagList.length > tagMaxNum)
+								return;
+				    		if(key == "text")
+				    			tagList.push(obj[key]);
+				    		traverseTags(obj[key]);
+				    	}
+				}
+			}
 		}
 
 /*Auxiliary functions for text retrieval*/
