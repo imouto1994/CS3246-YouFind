@@ -1,5 +1,7 @@
 var App = App || {};
 
+var test = true;
+
 App.main = (function(){
 	var hasSwitchedToSecondView = false
  	var currentImageURL = null;
@@ -88,9 +90,20 @@ App.main = (function(){
 		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;
 		var termScoresList = [];
 		var termsList = [];	
-		var videos = []
+		var videos = [];
+		var counter = 0;
 
-		
+		var time_processImageSearch = 0;
+		var time_googleImageSearch = 0;
+		var time_googleDomAnalysis = 0;
+		var time_youtubeSearch = 0;
+		var time_queryVideoStat = 0;
+		var time_displayVideos = 0;
+
+		var start_youtubeSearch = 0;
+		var start_queryVideoStat = 0;
+		var start_processImageSearch = new Date();
+		var start_googleImageSearch = new Date();
 		$.ajax({
 			url: '/search',
 			type: 'GET',
@@ -102,151 +115,25 @@ App.main = (function(){
 				$('.grid').html('<i class="fa fa-circle-o-notch fa-spin"></i>');
 			},
 			success: function(data) {
+				if(test)
+					time_googleImageSearch += new Date() - start_googleImageSearch;
+
+				var start_googleDomAnalysis = new Date();
 				extractTerms(data);
+				if(test)
+					time_googleDomAnalysis += new Date() - start_googleDomAnalysis;
+
+				if(test)
+					start_youtubeSearch = new Date();
 				searchVideos();
+
 			},
 			error: function(data) {
 				console.log(data);
 			}
 		});
 
-		function searchVideos(terms) {
-			var str = ""
-			for(var i = 0; i < termScoresList.length && i < 5; i++){
-				if(termScoresList[i].score > 10){
-					str += termScoresList[i].term + " ";
-				}
-			}
-			var textQueryTerms = $('.fancyInput').text().trim().split('\\s+');
-			for(term in textQueryTerms){
-				if(str.indexOf(textQueryTerms[term]) == -1){
-					str += textQueryTerms[term] + " ";
-				}
-			}
-			console.log("Query String: " + str);
-
-			var order = 'relevance';
-			var selectedOrder = $("input[type='radio'][name='order']:checked");
-			if(selectedOrder.length > 0){
-				order = selectedOrder.val();
-			}
-			console.log(order);
-			var request = gapi.client.youtube.search.list({
-				part: 'snippet',
-				q: str.trim(),
-				maxResults: 10,
-				order: order,
-				type: 'video'
-			});
-			request.execute(function(response) {
-				var result = response.result;
-				var counter = 0;
-				for(index in result.items){
-					var item = result.items[index];
-					var video = {};
-					video.id = item.id.videoId;
-					video.title = item.snippet.title;
-					video.publishedAt = item.snippet.publishedAt;
-					video.description = item.snippet.description;
-					video.channelTitle = item.snippet.channelTitle;
-					video.thumbnail = item.snippet.thumbnails.medium.url;
-
-					searchStatistics(video, result.items.length);
-				}
-			});
-		}
-
-		function searchStatistics(video, count){
-
-			var videoRequest = gapi.client.youtube.videos.list({
-				part: 'statistics, topicDetails, recordingDetails',
-				id: video.id,
-			});
-
-			counter = 0;
-			videoRequest.execute(function(videoResponse){
-				var videoResult = videoResponse.result;
-				video.viewCount = videoResult.items[0].statistics.viewCount;
-
-				if(videoResult.items[0].recordingDetails) {
-					video.location = videoResult.items[0].recordingDetails.location;
-					console.log("video "+videos.length+"has location");
-					console.log(video.location);
-				}
-				videos.push(video);
-				//only display results when this is the last video
-				if(counter >= count - 1){
-					displayResults();
-				}
-				counter++;
-			});
-		}
-
-		function printText(obj){
-			if(typeof obj == 'object')
-				for(var key in obj){
-		    		if(key == "text")
-		    			console.log(obj[key]);
-		    		printText(obj[key]);
-		    	}
-		}
-
-		function displayResults(){
-			$('.grid').html('<ul></ul>');
-			for(index in videos){
-				video = videos[index];
-				var html = "<li>"
-				html +=	"<figure>"
-				html +=		'<div class="youfind-result-thumbnail">'
-				html += 		'<div class="youfind-overlay">'
-				html += 			'<button type="button" value="' +  video.id + '" class="button play-button youfind-modal-trigger" data-modal="videoModal">'
-				html +=					'<i class="fa fa-play-circle"></i>'
-				html +=     		'</button>'
-				html += 		'</div>'
-				html += 		'<img src="' + video.thumbnail + '">'
-				html +=		'</div>'
-				html +=		'<figcaption>'
-				html +=			'<h3 class="youfind-result-title">' + video.title + '</h3>'
-				html += 		'<p class="youfind-result-channel">' + video.channelTitle + '</p>'
-				html += 		'<p class="youfind-result-date">' + video.publishedAt.substr(0, video.publishedAt.indexOf("T")) + '</p>'
-				html +=			'<p class="youfind-result-views">' + video.viewCount + ' views</p>'
-				html += 		'<p class="youfind-result-description">' + video.description + '</p>'
-				html +=			'<div class="g-ytsubscribe"></div>'
-				html += 	'</figcaption>'
-			 	html += '</figure>'
-				html += '</li>'
-			 	$('.grid ul').append(html);
-			}
-			bindPlayButtons();
-			addSubscrButtons();
-		}
-
-		function bindPlayButtons(){
-			$('.play-button').each(function(){
-				$(this).on('click', function(e){
-					console.log("TEST");
-					var player = document.getElementById('resultPlayer');
-					if(player){
-						player.loadVideoById($(this).attr('value'));
-					}
-					relevanceFeedback($(this).parents("li")[0]);
-				})
-				App.modal.linkModal(this);
-			})
-		}
-
-		function addSubscrButtons(){
-			$.getScript("https://apis.google.com/js/platform.js");
-			$(".g-ytsubscribe").each(function(index, element){
-				var channelTitle = $(this).siblings(".youfind-result-channel").text();
-				if(channelTitle != ""){
-					$(this).attr("data-channel", channelTitle);
-				}
-			})
-		}
-
 		function extractTerms(data) {
-			var start = new Date();				
 			var bestGuess = $(data).find(".qb-b").text();
 			var searchResult = $(data).find(".srg");
 
@@ -274,15 +161,192 @@ App.main = (function(){
 				console.log($(this));
 			})
 		    termScoresList.sort(compare);
-			console.log("result");
-			var result = "";
-			termScoresList.forEach(function(termScore){
-				result += termScore.term+" "+termScore.score+"\t";
-			})
-			console.log(result);
-			var end = new Date();
-			console.log("Timing for Dom analysis:\t"+(end-start)+" ms");
+
+			if(test){
+				var result = "";
+				console.log("=====================")
+				console.log("Google search result");
+				termScoresList.forEach(function(termScore){
+					result += termScore.term+" "+termScore.score+"\t";
+				})
+				console.log(result);
+			}
 		}
+
+		function searchVideos(terms) {
+
+			//prepare for youtube query
+			var str = ""
+			for(var i = 0; i < termScoresList.length && i < 5; i++){
+				if(termScoresList[i].score > 10){
+					str += termScoresList[i].term + " ";
+				}
+			}
+			var textQueryTerms = $('.fancyInput').text().trim().split('\\s+');
+			for(term in textQueryTerms){
+				if(str.indexOf(textQueryTerms[term]) == -1){
+					str += textQueryTerms[term] + " ";
+				}
+			}
+			console.log("Youtube query String: " + str);
+
+			var order = 'relevance';
+			var selectedOrder = $("input[type='radio'][name='order']:checked");
+			if(selectedOrder.length > 0){
+				order = selectedOrder.val();
+			}
+			console.log(order);
+			var request = gapi.client.youtube.search.list({
+				part: 'snippet',
+				q: str.trim(),
+				maxResults: 10,
+				order: order,
+				type: 'video'
+			});
+			request.execute(function(response) {
+				if(test)
+					time_youtubeSearch += new Date() - start_youtubeSearch;
+
+				var result = response.result;
+				for(index in result.items){
+					var item = result.items[index];
+					var video = {};
+					video.id = item.id.videoId;
+					video.title = item.snippet.title;
+					video.publishedAt = item.snippet.publishedAt;
+					video.description = item.snippet.description;
+					video.channelTitle = item.snippet.channelTitle;
+					video.thumbnail = item.snippet.thumbnails.medium.url;
+
+					start_queryVideoStat = new Date();
+					searchStatistics(video, result.items.length);
+				}
+			});
+		}
+
+		function searchStatistics(video, count){
+
+			var videoRequest = gapi.client.youtube.videos.list({
+				part: 'statistics, topicDetails, recordingDetails',
+				id: video.id,
+			});
+
+			videoRequest.execute(function(videoResponse){
+				var videoResult = videoResponse.result;
+				video.viewCount = videoResult.items[0].statistics.viewCount;
+
+				if(videoResult.items[0].recordingDetails) {
+					video.location = videoResult.items[0].recordingDetails.location;
+					console.log("video "+videos.length+"has location");
+					console.log(video.location);
+				}
+				videos.push(video);
+
+				//only display results when this is the last video
+				if(counter >= count - 1){
+					if(test)
+						time_queryVideoStat += new Date() - start_queryVideoStat;
+
+					displayResults();
+					counter == 0;
+				}
+				counter++;
+			});
+		}
+
+		function printText(obj){
+			if(typeof obj == 'object')
+				for(var key in obj){
+		    		if(key == "text")
+		    			console.log(obj[key]);
+		    		printText(obj[key]);
+		    	}
+		}
+
+		function displayResults(){
+			var start_displayVideos = new Date();
+
+			$('.grid').html('<ul></ul>');
+			for(index in videos){
+				video = videos[index];
+				var html = "<li>"
+				html +=	"<figure>"
+				html +=		'<div class="youfind-result-thumbnail">'
+				html += 		'<div class="youfind-overlay">'
+				html += 			'<button type="button" value="' +  video.id + '" class="button play-button youfind-modal-trigger" data-modal="videoModal">'
+				html +=					'<i class="fa fa-play-circle"></i>'
+				html +=     		'</button>'
+				html += 		'</div>'
+				html += 		'<img src="' + video.thumbnail + '">'
+				html +=		'</div>'
+				html +=		'<figcaption>'
+				html +=			'<h3 class="youfind-result-title">' + video.title + '</h3>'
+				html += 		'<p class="youfind-result-channel">' + video.channelTitle + '</p>'
+				html += 		'<p class="youfind-result-date">' + video.publishedAt.substr(0, video.publishedAt.indexOf("T")) + '</p>'
+				html +=			'<p class="youfind-result-views">' + video.viewCount + ' views</p>'
+				html += 		'<p class="youfind-result-description">' + video.description + '</p>'
+				html +=			'<div class="g-ytsubscribe"></div>'
+				html += 	'</figcaption>'
+			 	html += '</figure>'
+				html += '</li>'
+			 	$('.grid ul').append(html);
+			}
+			bindPlayButtons();
+			addSubscrButtons();
+
+			if(test){
+				time_displayVideos += new Date() - start_displayVideos;
+				time_processImageSearch += new Date() - start_processImageSearch;
+				printBenchmark();
+			}
+		}
+
+		function printBenchmark(){
+			var benchmarkResult = ""; 
+			benchmarkResult += "================\n";
+			benchmarkResult += "Benchmark Result\n";
+			benchmarkResult += "================\n";
+			benchmarkResult += "Total time to search and display the video results using image:\t"+time_processImageSearch+" ms\n";
+			benchmarkResult += "Time for google image searching:\t"+time_googleImageSearch+" ms\n";
+			benchmarkResult += "Time for google response dom analysis\t"+time_googleDomAnalysis+" ms\n";
+			benchmarkResult += "Time for youtube searching:\t"+time_youtubeSearch+" ms\n";
+			benchmarkResult += "Time for querying statistics for each video result\t"+time_queryVideoStat+" ms\n";
+			benchmarkResult += "Time for displaying video results\t"+time_displayVideos+" ms\n";
+			console.log(benchmarkResult);
+
+			time_processImageSearch = 0;
+			time_googleImageSearch = 0;
+			time_googleDomAnalysis = 0;
+			time_youtubeSearch = 0;
+			time_queryVideoStat = 0;
+			time_displayVideos = 0;
+		}
+
+		function bindPlayButtons(){
+			$('.play-button').each(function(){
+				$(this).on('click', function(e){
+					console.log("TEST");
+					var player = document.getElementById('resultPlayer');
+					if(player){
+						player.loadVideoById($(this).attr('value'));
+					}
+					relevanceFeedback($(this).parents("li")[0]);
+				})
+				App.modal.linkModal(this);
+			})
+		}
+
+		function addSubscrButtons(){
+			$.getScript("https://apis.google.com/js/platform.js");
+			$(".g-ytsubscribe").each(function(index, element){
+				var channelTitle = $(this).siblings(".youfind-result-channel").text();
+				if(channelTitle != ""){
+					$(this).attr("data-channel", channelTitle);
+				}
+			})
+		}
+
+
 
 		/*get video topics using topic IDs and change term score with video title, description and related topics*/
 		function relevanceFeedback(videoHtml){
@@ -305,6 +369,8 @@ App.main = (function(){
 			})
 			console.log(result);
 		}
+
+/*Auxiliary functions for text retrieval*/
 
 		function appendToTermScoreList(array, score, isSortNeeded){
 
@@ -363,6 +429,7 @@ App.main = (function(){
 			return filteredTerms;
 		}
 	}
+
 
 	return {
 		initializeYoutubePlayer: function(){
