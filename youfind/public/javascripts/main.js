@@ -4,6 +4,9 @@ App.main = (function(){
 	var hasSwitchedToSecondView = false
  	var currentImageURL = null;
 	var english = /^[A-Za-z0-9]*$/;
+	var termScoresList = [];
+	var termsList = [];
+
 
  	/* Reconfigure text field for search field after switching view */
 	function configureTextField(input){
@@ -47,7 +50,6 @@ App.main = (function(){
       		error: function(json){
       			$(buttonIcon).removeClass('fa-circle-o-notch fa-spin');
       			$(buttonIcon).addClass('fa-warning');
-      			console.log("Cannot upload image");
       		}
       	})
       };       
@@ -87,12 +89,9 @@ App.main = (function(){
 	}
 
 	function processImageSearch() {
-		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;
-		var termScoresList = [];
-		var termsList = [];	
+		var googleImageSearchURL = 'https://images.google.com/searchbyimage?site=search&image_url=' + currentImageURL;			
 		var videos = []
 
-		
 		$.ajax({
 			url: '/search',
 			type: 'GET',
@@ -114,10 +113,8 @@ App.main = (function(){
 
 		function searchVideos(terms) {
 			var str = ""
-			for(var i = 0; i < termScoresList.length && i < 5; i++){
-				if(termScoresList[i].score > 10){
+			for(var i = 0; i < termScoresList.length && i < 3; i++){
 					str += termScoresList[i].term + " ";
-				}
 			}
 			var textQueryTerms = $('.fancyInput').text().trim().split('\\s+');
 			for(term in textQueryTerms){
@@ -132,7 +129,6 @@ App.main = (function(){
 			if(selectedOrder.length > 0){
 				order = selectedOrder.val();
 			}
-			console.log(order);
 			var request = gapi.client.youtube.search.list({
 				part: 'snippet',
 				q: str.trim(),
@@ -146,24 +142,23 @@ App.main = (function(){
 				if (result.items.length == 0) {
 					displayNoResults();
 				} else {
-				for(index in result.items){
-					var item = result.items[index];
-					var video = {};
-					video.id = item.id.videoId;
-					video.title = item.snippet.title;
-					video.publishedAt = item.snippet.publishedAt;
-					video.description = item.snippet.description;
-					video.channelTitle = item.snippet.channelTitle;
-					video.thumbnail = item.snippet.thumbnails.medium.url;
+					for(index in result.items){
+						var item = result.items[index];
+						var video = {};
+						video.id = item.id.videoId;
+						video.title = item.snippet.title;
+						video.publishedAt = item.snippet.publishedAt;
+						video.description = item.snippet.description;
+						video.channelTitle = item.snippet.channelTitle;
+						video.thumbnail = item.snippet.thumbnails.medium.url;
 
-					searchStatistics(video, result.items.length);
-				}
+						searchStatistics(video, result.items.length);
+					}
 				}
 			});
 		}
 
 		function searchStatistics(video, count){
-
 			var videoRequest = gapi.client.youtube.videos.list({
 				part: 'statistics, topicDetails, recordingDetails',
 				id: video.id,
@@ -189,12 +184,13 @@ App.main = (function(){
 		}
 
 		function printText(obj){
-			if(typeof obj == 'object')
+			if(typeof obj == 'object'){
 				for(var key in obj){
-		    		if(key == "text")
-		    			console.log(obj[key]);
-		    		printText(obj[key]);
-		    	}
+	    		if(key == "text")
+	    			console.log(obj[key]);
+	    		printText(obj[key]);
+		    }
+		  }
 		}
 
 		function displayResults(){
@@ -234,7 +230,6 @@ App.main = (function(){
 		function bindPlayButtons(){
 			$('.play-button').each(function(){
 				$(this).on('click', function(e){
-					console.log("TEST");
 					var player = document.getElementById('resultPlayer');
 					if(typeof player != 'undefined'){
 						player.loadVideoById($(this).attr('value'));
