@@ -141,6 +141,10 @@ App.main = (function(){
 			request.execute(function(response) {
 				var result = response.result;
 				var counter = 0;
+				if (result.items.length == 0) {
+					alert("SHIT HAPPEN");
+					displayResults();
+				} else {
 				for(index in result.items){
 					var item = result.items[index];
 					var video = {};
@@ -152,6 +156,7 @@ App.main = (function(){
 					video.thumbnail = item.snippet.thumbnails.medium.url;
 
 					searchStatistics(video, result.items.length);
+				}
 				}
 			});
 		}
@@ -225,7 +230,7 @@ App.main = (function(){
 				$(this).on('click', function(e){
 					console.log("TEST");
 					var player = document.getElementById('resultPlayer');
-					if(player){
+					if(typeof player != 'undefined'){
 						player.loadVideoById($(this).attr('value'));
 					}
 				})
@@ -264,15 +269,9 @@ App.main = (function(){
 				//add filtered terms to a final array
 				appendToTermScoreList(tokenizedTitle, 3);
 				appendToTermScoreList(tokenizedContent, 1, true);
-
-				console.log(title);
-				console.log("Best guess'\t"+tokenizedBestGuess);
-				console.log("Filtered titles\t"+tokenizedTitle);
-				console.log("Filtered contents\t"+tokenizedContent);
-				console.log($(this));
 			})
-		    termScoresList.sort(compare);
-			console.log("result");
+		  termScoresList.sort(compare);
+			console.log("Result: ");
 			var result = "";
 			termScoresList.forEach(function(termScore){
 				result += termScore.term+" "+termScore.score+"\t";
@@ -431,5 +430,5 @@ $(document).ready(function(){
 	App.main.bindAcceptButton();
 	App.main.bindSearchButton();
 	App.main.detectUrlQuery();
-	App.main.readStopWordList();
+	//App.main.readStopWordList();
 });

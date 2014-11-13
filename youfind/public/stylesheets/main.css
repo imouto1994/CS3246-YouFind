@@ -261,6 +261,11 @@ label {
 	opacity: 0;
 }
 
+.login-button i {
+	visibility: visible;
+	opacity: 1;
+}
+
 .settings-button {
 	position: fixed;
 	top: 0.35em;
