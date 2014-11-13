@@ -266,8 +266,10 @@ App.main = (function(){
 				var videoResultItem = videoResult.items[0];
 				video.viewCount = videoResultItem.statistics.viewCount;
 
-				video.topicIds = videoResultItem.topicDetails.topicIds;
-				video.relevantTopicIds = videoResultItem.topicDetails.relevantTopicIds;
+				if(videoResultItem.topicDetails) {
+					video.topicIds = videoResultItem.topicDetails.topicIds;
+					video.relevantTopicIds = videoResultItem.topicDetails.relevantTopicIds;
+				}
 				if(videoResultItem.recordingDetails) {
 					video.location = videoResultItem.recordingDetails.location;
 					if(test) {
@@ -418,16 +420,17 @@ App.main = (function(){
 
 			function getVideoTopics(){
 				var topicIds = videos[index].topicIds;
-				var relevantTopicIds = videos[index].relevantTopicIds;
 				var counter = 0;
 
-				//Just use the first topic temporarily
-			    var service_url = 'https://www.googleapis.com/freebase/v1/topic';
-			    var params = {};
-			    $.getJSON(service_url + topicIds[0] + '?callback=?', params, function(topic) {
-			    	topics.push(topic);
-			    	changeTermScore();
-			    });
+				if(topicIds && ! typeof topicIds !== undefined){
+					//Just use the first topic temporarily
+				    var service_url = 'https://www.googleapis.com/freebase/v1/topic';
+				    var params = {};
+				    $.getJSON(service_url + topicIds[0] + '?callback=?', params, function(topic) {
+				    	topics.push(topic);
+				    	changeTermScore();
+				    });
+				}
 			}
 
 			function changeTermScore(){
@@ -437,15 +440,18 @@ App.main = (function(){
 				var tokenizedTitle = tokenizeText(videoTitle);
 				var tokenizedDescription = tokenizeText(videoDescription);
 
-				//temporarily just utlize the first topic
-				var topic = topics[0];
-				var tagList = [];
-				var tagMaxNum = 10;
-				traverseTags(topic, tagMaxNum);
 
 				appendToTermScoreList(tokenizedTitle, 3 * factor);
 				appendToTermScoreList(tokenizedDescription, 1 * factor);
-				appendToTermScoreList(tagList, 1 * factor);
+
+				if(topicIds && ! typeof topicIds !== undefined){
+					//temporarily just utlize the first topic
+					var topic = topics[0];
+					var tagList = [];
+					var tagMaxNum = 10;
+					traverseTags(topic, tagMaxNum);
+					appendToTermScoreList(tagList, 1 * factor);
+				}
 
 				termScoresList.sort(compare);
 
