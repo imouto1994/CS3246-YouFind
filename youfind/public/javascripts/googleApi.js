@@ -1,3 +1,4 @@
+var App = App || {};
 var GOOGLE_API_KEY = "AIzaSyDjR_Icuc789VOUUdapZJ5fHroLQ7bU8zA"
 var OAUTH2_CLIENT_ID = '824806387372-fis3vkdukrjte9r2vogci2eg206ga0tb.apps.googleusercontent.com';
 var OAUTH2_SCOPES = [
