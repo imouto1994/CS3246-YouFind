@@ -9,14 +9,12 @@ App.main = (function(){
  	var counter = 0;
 	var english = /^[A-Za-z0-9]*$/;
 
-
-
  	/* Reconfigure text field for search field after switching view */
 	function configureTextField(input){
 		setTimeout(function(){
-			window.fancyInput.setCaretHeight(input);
 			window.fancyInput.inputResize(input);
-		}, 200);
+			window.fancyInput.setCaretHeight(input);
+		}, 400);
 	}
 
 	/* Read uploaded image */
@@ -44,6 +42,7 @@ App.main = (function(){
       			$(buttonIcon).addClass('fa-circle-o-notch fa-spin');
       		},
       		success: function(json){
+      			App.notification.showMessage("Upload image successfully");
       			$(buttonIcon).removeClass('fa-circle-o-notch fa-spin');
       			$(buttonIcon).addClass('fa-check-circle');
       			currentImageURL = json.data.link;
@@ -51,6 +50,7 @@ App.main = (function(){
       			$('.search-button').trigger('click');
       		},
       		error: function(json){
+      			App.notification.showError("There is problem in uploading the image. Please retry.");
       			$(buttonIcon).removeClass('fa-circle-o-notch fa-spin');
       			$(buttonIcon).addClass('fa-warning');
       		}
@@ -193,7 +193,7 @@ App.main = (function(){
 				str += termScoresList[i].term + " ";
 			}
 			for(var i = 3; i < termScoresList.length && i < 5; i++){
-				if(termScoresList[i].score >= 8)
+				if(termScoresList[i].score >= 12)
 					str += termScoresList[i].term + " ";
 			}
 			var textQueryTerms = $('.fancyInput').text().trim().split('\\s+');
@@ -301,7 +301,7 @@ App.main = (function(){
 				$('.search-button').prop('disabled', false);
 			}
 			var start_displayVideos = new Date();
-
+			App.notification.showMessage(videos.length + " videos are retrieved")
 			$('.grid').html('<ul></ul>');
 			for(index in videos){
 				video = videos[index];
@@ -394,8 +394,10 @@ App.main = (function(){
 					if(selectedMode.length > 0){
 						mode = selectedMode.val();
 					}
+
 					if(mode == 'auto'){
-						$('.feedback-button').prop('disabled', true);
+						$('.search-button > i').attr('class', 'fa fa fa-circle-o-notch fa-spin');
+						$('.search-button').prop('disabled', true);
 						relevanceFeedback($(this).parents("li")[0], 2, searchVideos);
 					} else 
 						relevanceFeedback($(this).parents("li")[0], 2);
@@ -614,12 +616,14 @@ App.main = (function(){
 				$(acceptIcon).attr("class", "fa fa-circle-o-notch fa-spin");
 				imageExists($('#imageURLTextField').val(), function(isValid){
 					if(isValid){
+						App.notification.showMessage("The image is retrieved successfully from the given URL")
 						$(acceptIcon).removeClass('fa-circle-o-notch fa-spin');
       			$(acceptIcon).addClass('fa-check-circle');
 						currentImageURL = $('#imageURLTextField').val();
 						App.modal.removeAllModals();
 						$('.search-button').trigger('click');
 					} else {
+						App.notification.showError("The URL is invalid")
 						$(acceptIcon).removeClass('fa-circle-o-notch fa-spin');
       			$(acceptIcon).addClass('fa-warning');
 					}
@@ -632,6 +636,8 @@ App.main = (function(){
 				if(isValidForSearch()){
 					switchToSecondView($('#searchTextField'));
 					search();
+				} else {
+					App.notification.showError("There has been no uploaded image")
 				}
 
 				function isValidForSearch() {

@@ -699,6 +699,59 @@ input#imageFileChooser {
 	display: none;
 }
 
+/* Notification */
+.youfind-noti {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	background: rgba(42,45,50,0.85);
+	font-weight: 700;
+	padding: 22px;
+	line-height: 1.5em;
+	z-index: 2200;
+	pointer-events: none;
+	-webkit-transition: -webkit-transform .5s;
+	   -moz-transition: -moz-transform .5s;
+	    -ms-transition: -ms-transform .5s;
+	     -o-transition: -o-transform .5s;
+	        transition: transform .5s;
+}
+
+.youfind-noti-success {
+	color: #2ecc71;
+}
+
+.youfind-noti-error {
+	color: #e74c3c;
+}
+
+.youfind-noti-hide {
+	-webkit-transform: translateY(100%);
+	   -moz-transform: translateY(100%);
+	    -ms-transform: translateY(100%);
+	     -o-transform: translateY(100%);
+	        transform: translateY(100%);
+}
+
+.youfind-noti-inner {
+	position: relative;
+}
+
+.youfind-noti-icon {
+	position: absolute;
+	font-size: 2em;
+}
+
+.youfind-noti-icon.fa-smile-o {
+	color:;
+}
+
+.youfind-noti-message {
+	margin: 0;
+	padding-left: 4em;
+}
+
 @media only screen and (max-width: 560px){
 	.youfind-header .search-button {
 		width: 85%%;
